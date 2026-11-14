@@ -1,0 +1,23 @@
+Tableau comparatif de 20 panneaux photovoltaïques de différentes marques;;;;;;;
+;;;;;;;
+N°;Marque;Modèle;Dimensions (mm);Puissance;Prix unitaire estimé;Technologie;Rendement
+1;SunPower;Maxeon 6 Black 425 Wc;1690 x 1046 x 40;425 Wc;250-300 €;Monocristallin Maxeon;22%
+2;Trina Solar;Vertex S+ TSM-NEG9RC.27;1762 x 1134 x 30;425 Wc;180-220 €;Monocristallin N-Type TOPCon bifacial;21,30%
+3;Trina Solar;Vertex 400W;2024 x 1002 x 30;400 Wc;170-210 €;Monocristallin;20%
+4;Trina Solar;Vertex S+ 500 Wc;2187 x 1102 x 35;500 Wc;210-250 €;Monocristallin N-Type TOPCon bi-verre;22,30%
+5;Longi Solar;Hi-MO X6 Scientist;1722 x 1134 x 30;400 Wc;180-220 €;Monocristallin HPBC Pro;22,60%
+6;Longi Solar;LR4-72HPH 500W;2094 x 1134 x 35;500 Wc;220-260 €;Monocristallin;21%
+7;Meyer Burger;Black 400 Wc;1724 x 1041 x 30;400 Wc;210-250 €;Monocristallin hétérojonction/SmartWire bi-verre;21,50%
+8;Meyer Burger;White 380-400 Wc;1724 x 1041 x 30;380-400 Wc;200-250 €;Monocristallin hétérojonction;20-21%
+9;QCells;Q.PEAK DUO BLK M-G11S+;1740 x 1030 x 32;400-425 Wc;190-230 €;Monocristallin Q.ANTUM NEO;21,10%
+10;QCells;Q.TRON BLK M-G2+;1722 x 1134 x 30;420-440 Wc;200-240 €;Monocristallin Q.ANTUM NEO;22,50%
+11;JA Solar;JAM72D30;2015 x 1002 x 35;440 Wc;180-220 €;Monocristallin PERC;21%
+12;JinkoSolar;Tiger Neo N-Type 425 Wc;1722 x 1134 x 30;425 Wc;185-225 €;Monocristallin N-Type TOPCon;21,80%
+13;Canadian Solar;HiKu 6 440W;2108 x 1048 x 35;440 Wc;190-230 €;Monocristallin Multi-busbar;20,90%
+14;DualSun;Flash 500 Half-Cut TOPCon;2187 x 1102 x 35;500 Wc;230-270 €;Monocristallin N-Type TOPCon bi-verre Full Black;22,61%
+15;DualSun;Flash 425 Half-Cut;1762 x 1134 x 30;425 Wc;210-250 €;Monocristallin TOPCon Full Black;21,50%
+16;DualSun;Spring Hybrid 280 Wc;1670 x 1000 x 40;280 Wc + 856 W thermique;450-550 €;Monocristallin hybride (électricité + eau chaude);17,20%
+17;Solarwatt;Panel Vision 540 Wc;2278 x 1134 x 35;540 Wc;240-290 €;Monocristallin PERC bi-verre;20%
+18;REC Solar;Alpha Pure-R 405 Wc;1821 x 1016 x 30;405 Wc;200-240 €;Monocristallin hétérojonction;21,70%
+19;LG;NeON R 400 Wc;1686 x 1016 x 40;400 Wc;220-280 €;Monocristallin N-Type;21%
+20;Voltec Solar;Tarka 120;1670 x 1000 x 35;375 Wc;180-220 €;Monocristallin;19,50%

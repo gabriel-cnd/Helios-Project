@@ -1,0 +1,39 @@
+# Contient les paramètres configurables (modifiables pour pas changer le code source): 
+#     1. coordonnées GPS du site 
+#     2. vitesse max des moteurs 
+#     3. gain PID 
+#     4. seuils de sécurité 
+#     5. paramètres paramètres d'interface 
+
+#geographic coordinates
+latitude: 46.5
+longitude: 6.6
+
+# PID controllers settings
+pid:
+  azimuth:
+    kp: 1.0
+    ki: 0.1
+    kd: 0.05
+  elevation:
+    kp: 1.0
+    ki: 0.1
+    kd: 0.05
+
+# mechanic limits (degrees):
+mechanical_limits:
+  azimuth:
+    min: 0
+    max: 180
+  elevation:
+    min: 0
+    max: 90
+
+# weather / API options
+meteo:
+  provider: meteoswiss
+  meteoswiss:
+    base_url: "https://app-prod-ws.meteoswiss.ch/v1/plasma/rest"
+    lang: "fr"
+    timeout: 10
+    allow_fallback: true

@@ -1,0 +1,10 @@
+{
+    "project_name": "Helios",
+    "version": "1.0.0",
+    "description": "Intelligent solar panel orientation system",
+    "authors": [
+        "Dahman Elisa",
+        "Gabriel Conde Garea",
+        "Gloor Lorentin"
+    ]
+}

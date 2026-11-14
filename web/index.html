@@ -1,0 +1,3638 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HELIOS – Tableau de bord solaire</title>
+  <style>
+    :root {
+      --bg: #05070d;
+      --card: rgba(255, 255, 255, 0.06);
+      --card-stroke: rgba(255, 255, 255, 0.08);
+      --accent: #4dd2c6;
+      --accent-2: #7b8cff;
+      --text: #eaf0ff;
+      --muted: #9ab0d6;
+      --shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Sora", "Work Sans", "Segoe UI", sans-serif;
+      color: var(--text);
+      background: radial-gradient(120% 120% at 20% 20%, #0b1531 0, #04060c 35%, #03040a 70%, #03040a 100%);
+      min-height: 100vh;
+      padding: 32px 20px 60px;
+      letter-spacing: 0.01em;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .header-actions .secondary {
+      padding: 8px 14px;
+      font-size: 13px;
+    }
+
+    .title {
+      font-size: 32px;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .title span {
+      padding: 6px 12px;
+      background: linear-gradient(120deg, var(--accent), var(--accent-2));
+      color: #051019;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .subtitle {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+      margin-bottom: 16px;
+    }
+
+    .stat {
+      background: var(--card);
+      border: 1px solid var(--card-stroke);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      box-shadow: var(--shadow);
+    }
+    .stat .label { color: var(--muted); font-size: 13px; margin-bottom: 4px; }
+    .stat .value { font-size: 20px; font-weight: 700; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      align-items: start;
+    }
+    .param-panel .grid {
+      grid-template-columns: 1fr 1fr 1.2fr;
+      gap: 20px;
+    }
+    .param-panel .card {
+      height: 100%;
+    }
+    .param-panel .card {
+      background: linear-gradient(160deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    }
+    .param-panel .card h2 {
+      margin: -20px -20px 16px;
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(5, 16, 25, 0.6);
+      border-top-left-radius: var(--radius);
+      border-top-right-radius: var(--radius);
+    }
+    .param-panel .actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .param-panel .actions .secondary {
+      font-size: 13px;
+      padding: 9px 10px;
+    }
+    .param-panel .energy-note {
+      font-size: 13px;
+    }
+    .param-panel .card.span-2 {
+      grid-column: span 2;
+    }
+    .param-panel .card.span-3 {
+      grid-column: 1 / -1;
+    }
+
+    .primary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 24px;
+      align-items: start;
+      margin-top: 8px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--card-stroke);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(6px);
+    }
+
+    h2 {
+      margin: 0 0 16px;
+      font-size: 18px;
+      letter-spacing: 0.03em;
+    }
+
+    .form {
+      display: grid;
+      gap: 12px;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    label {
+      font-size: 13px;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    input, button, select {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+      padding: 10px 12px;
+      font-size: 15px;
+      transition: border 0.2s, transform 0.1s;
+    }
+    select option {
+      color: #111827;
+      background: #f5f7ff;
+    }
+    select option:checked,
+    select option:hover {
+      color: #111827;
+      background: #dfe7ff;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    button {
+      cursor: pointer;
+      border: none;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      background: linear-gradient(120deg, var(--accent), var(--accent-2));
+      color: #041017;
+      box-shadow: 0 10px 30px rgba(77, 210, 198, 0.25);
+    }
+    button.secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: none;
+    }
+    button:active { transform: translateY(1px); }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .result {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .result .label { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+    .result .value { font-size: 18px; font-weight: 700; }
+
+    .graph {
+      position: relative;
+      width: 100%;
+      height: 320px;
+      background: linear-gradient(145deg, rgba(77, 210, 198, 0.05), rgba(123, 140, 255, 0.05));
+      border: 1px solid var(--card-stroke);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .graph canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .graph.small {
+      height: 240px;
+    }
+
+    .legend {
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .dot {
+      width: 12px; height: 12px; border-radius: 50%;
+      display: inline-block;
+    }
+
+    .loss-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      font-size: 14px;
+    }
+    .loss-table th,
+    .loss-table td {
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 8px;
+      text-align: center;
+    }
+    .loss-table th {
+      font-weight: 600;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .energy-note {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 8px 0 0;
+    }
+    .section-title {
+      margin: 14px 0 6px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .finance-layout {
+      display: grid;
+      gap: 24px;
+    }
+    .finance-columns {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(320px, 1fr));
+      gap: 24px;
+      align-items: stretch;
+    }
+    .finance-col {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      min-height: 100%;
+    }
+    .finance-panel .card {
+      padding: 20px;
+    }
+    .finance-panel .muted-text {
+      font-size: 14px;
+    }
+    .finance-panel .results-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .finance-panel .result .value {
+      font-size: 16px;
+    }
+    .table-scroll {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.02);
+      padding: 8px;
+      margin-top: 8px;
+    }
+    .finance-panel .loss-table {
+      margin-top: 0;
+      font-size: 12px;
+    }
+    .finance-panel .loss-table th,
+    .finance-panel .loss-table td {
+      padding: 6px;
+    }
+    .production-panel .production-layout {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(320px, 1fr));
+      gap: 20px;
+      align-items: start;
+    }
+    .production-panel .production-col {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .production-panel .production-layout + .card,
+    .production-panel .production-layout + .grid,
+    .production-panel .card + .grid,
+    .production-panel .grid + .card {
+      margin-top: 24px;
+    }
+    .production-panel .card + .card {
+      margin-top: 16px;
+    }
+    .sizing-panel .sizing-layout {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(320px, 1fr));
+      gap: 20px;
+      align-items: start;
+    }
+    .sizing-panel .sizing-col {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .sizing-panel .results-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .muted-text {
+      color: var(--muted);
+      font-size: 13px;
+      margin: 0 0 8px;
+    }
+    .warning {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(246, 193, 119, 0.35);
+      background: rgba(246, 193, 119, 0.1);
+      color: #f6c177;
+      font-size: 13px;
+    }
+    .weather-block {
+      margin-top: 12px;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.03);
+      display: grid;
+      gap: 8px;
+    }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      width: fit-content;
+    }
+    .status-pill.info { background: rgba(77, 210, 198, 0.15); color: #4dd2c6; }
+    .status-pill.success { background: rgba(125, 255, 191, 0.12); color: #7dffbf; }
+    .status-pill.error { background: rgba(255, 118, 118, 0.12); color: #ff7676; }
+    .status-pill.pending { background: rgba(246, 193, 119, 0.12); color: #f6c177; }
+
+    .tab-bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scrollbar-width: thin;
+      margin: 6px 0 2px;
+    }
+    .tab-button {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 8px 16px;
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .tab-button:hover { border-color: rgba(255, 255, 255, 0.25); }
+    .tab-button.active {
+      background: linear-gradient(120deg, var(--accent), var(--accent-2));
+      color: #051019;
+      border-color: transparent;
+      box-shadow: 0 10px 24px rgba(77, 210, 198, 0.25);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .card + .card {
+      margin-top: 4px;
+    }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(7, 10, 16, 0.88);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 40;
+    }
+    .modal-backdrop.active { display: flex; }
+    .modal {
+      width: min(640px, 94vw);
+      background: linear-gradient(170deg, rgba(12, 18, 30, 0.96), rgba(10, 14, 22, 0.98));
+      border: 1px solid var(--card-stroke);
+      border-radius: var(--radius);
+      box-shadow: 0 30px 80px rgba(3, 7, 12, 0.55);
+      padding: 20px;
+    }
+    .modal h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+    .modal .modal-grid {
+      display: grid;
+      gap: 10px;
+    }
+    .modal .option-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .modal .option-row label {
+      margin: 0;
+      font-size: 14px;
+      color: var(--text);
+    }
+    .modal .option-row input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--accent);
+    }
+    .modal .option-row select {
+      max-width: 240px;
+    }
+    .modal .actions {
+      justify-content: flex-end;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 980px) {
+      .finance-columns {
+        grid-template-columns: 1fr;
+      }
+      .sizing-panel .sizing-layout {
+        grid-template-columns: 1fr;
+      }
+      .production-panel .production-layout {
+        grid-template-columns: 1fr;
+      }
+      .param-panel .grid {
+        grid-template-columns: 1fr;
+      }
+      .param-panel .card.span-2,
+      .param-panel .card.span-3 {
+        grid-column: 1 / -1;
+      }
+    }
+    @media (max-width: 768px) {
+      header { flex-direction: column; }
+      .title { font-size: 26px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <p class="title">HELIOS <span>Live</span></p>
+        <p class="subtitle">Suivi solaire • Consignes moteur • Irradiance estimée</p>
+      </div>
+      <div class="header-actions">
+        <button class="secondary" type="button" id="btnOpenReport">Télécharger rapport</button>
+      </div>
+    </header>
+
+    <nav class="tab-bar" role="tablist" aria-label="Catégories principales">
+      <button class="tab-button active" role="tab" aria-selected="true" aria-controls="tab-production" data-tab="production">Simulation de production</button>
+      <button class="tab-button" role="tab" aria-selected="false" aria-controls="tab-dimensionnement" data-tab="dimensionnement">Dimensionnement de l'installation</button>
+      <button class="tab-button" role="tab" aria-selected="false" aria-controls="tab-finances" data-tab="finances">Finances</button>
+      <button class="tab-button" role="tab" aria-selected="false" aria-controls="tab-parametres" data-tab="parametres">Paramètres</button>
+    </nav>
+
+    <div class="warning" id="validationWarning" style="display:none;"></div>
+
+    <section class="tab-panel production-panel active" id="tab-production" role="tabpanel" data-tab="production">
+      <div class="stat-row" id="statRow">
+        <div class="stat"><div class="label">Azimut actuel</div><div class="value" id="statAzimuth">--</div></div>
+        <div class="stat"><div class="label">Inclinaison actuelle</div><div class="value" id="statTilt">--</div></div>
+        <div class="stat"><div class="label">POA globale</div><div class="value" id="statPoa">--</div></div>
+        <div class="stat"><div class="label">Heure locale</div><div class="value" id="statTime">--</div></div>
+      </div>
+
+      <div class="production-layout">
+        <div class="production-col">
+          <div class="card">
+            <h2>Localisation &amp; temps</h2>
+            <div class="form">
+              <div>
+                <label for="cityPreset">Ville/station</label>
+                <select id="cityPreset">
+                  <option value="">-- Choisir une ville --</option>
+                  <option value="46.2044,6.1432">Genève</option>
+                  <option value="46.5197,6.6323">Lausanne</option>
+                  <option value="46.9480,7.4474">Berne</option>
+                  <option value="47.3769,8.5417">Zurich</option>
+                  <option value="47.5596,7.5886">Bâle</option>
+                  <option value="46.0037,8.9511">Lugano</option>
+                  <option value="46.8065,7.1619">Fribourg</option>
+                  <option value="46.9918,6.9310">Neuchâtel</option>
+                  <option value="46.2333,7.3667">Sion</option>
+                  <option value="46.8508,9.5329">Coire (Chur)</option>
+                  <option value="47.4245,9.3767">Saint-Gall</option>
+                  <option value="47.0502,8.3093">Lucerne</option>
+                  <option value="47.4996,8.7246">Winterthur</option>
+                  <option value="47.1368,7.2468">Bienne</option>
+                  <option value="46.7580,7.6280">Thoune</option>
+                  <option value="47.6973,8.6349">Schaffhouse</option>
+                  <option value="46.7785,6.6412">Yverdon-les-Bains</option>
+                  <option value="46.4312,6.9107">Montreux</option>
+                  <option value="46.4620,6.8435">Vevey</option>
+                  <option value="46.3832,6.2394">Nyon</option>
+                  <option value="47.1662,8.5155">Zoug</option>
+                  <option value="47.3921,8.0449">Aarau</option>
+                  <option value="47.2079,7.5371">Soleure</option>
+                  <option value="46.1950,9.0296">Bellinzone</option>
+                  <option value="46.1700,8.7990">Locarno</option>
+                  <option value="46.8027,9.8355">Davos</option>
+                  <option value="46.6863,7.8632">Interlaken</option>
+                  <option value="46.5191,6.5668">Morges</option>
+                </select>
+              </div>
+              <div>
+                <label for="lat">Latitude (°)</label>
+                <input type="number" id="lat" value="46.5" step="0.1" />
+              </div>
+              <div>
+                <label for="lon">Longitude (°)</label>
+                <input type="number" id="lon" value="6.6" step="0.1" />
+              </div>
+              <div>
+                <label for="tz">Décalage horaire (h, ex: 1 pour CET)</label>
+                <input type="number" id="tz" value="1" step="0.5" />
+              </div>
+              <div>
+                <label for="date">Date locale</label>
+                <input type="date" id="date" />
+              </div>
+              <div>
+                <label for="timeHour">Heure locale</label>
+                <div class="form-row">
+                  <select id="timeHour" aria-label="Heure">
+                    <option value="00">00</option>
+                    <option value="01">01</option>
+                    <option value="02">02</option>
+                    <option value="03">03</option>
+                    <option value="04">04</option>
+                    <option value="05">05</option>
+                    <option value="06">06</option>
+                    <option value="07">07</option>
+                    <option value="08">08</option>
+                    <option value="09">09</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                    <option value="13">13</option>
+                    <option value="14">14</option>
+                    <option value="15">15</option>
+                    <option value="16">16</option>
+                    <option value="17">17</option>
+                    <option value="18">18</option>
+                    <option value="19">19</option>
+                    <option value="20">20</option>
+                    <option value="21">21</option>
+                    <option value="22">22</option>
+                    <option value="23">23</option>
+                  </select>
+                  <select id="timeMinute" aria-label="Minute">
+                    <option value="00">00</option>
+                    <option value="05">05</option>
+                    <option value="10">10</option>
+                    <option value="15">15</option>
+                    <option value="20">20</option>
+                    <option value="25">25</option>
+                    <option value="30">30</option>
+                    <option value="35">35</option>
+                    <option value="40">40</option>
+                    <option value="45">45</option>
+                    <option value="50">50</option>
+                    <option value="55">55</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label for="weatherSource">Source météo</label>
+                <select id="weatherSource">
+                  <option value="clear_sky">Ciel clair (offline)</option>
+                  <option value="meteoswiss">MeteoSwiss (temps réel)</option>
+                </select>
+              </div>
+              <div class="actions">
+                <button id="btnNow">Position actuelle</button>
+                <button class="secondary" id="btnSim">Simuler la journée</button>
+              </div>
+              <div class="weather-block">
+                <span class="status-pill info" id="weatherStatus">Météo : ciel clair (offline)</span>
+                <p class="muted-text" id="weatherDetails">Aucune donnée météo.</p>
+                <button type="button" class="secondary" id="btnRefreshWeather">Rafraîchir la météo</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Scénarios &amp; hypothèses</h2>
+            <p class="muted-text">Scénario standard + MeteoSwiss : pondération d'un ciel clair par la mesure GHI.</p>
+            <div class="form">
+              <div class="form-row">
+                <div>
+                  <label for="scenarioType">Scénario principal</label>
+                  <select id="scenarioType">
+                    <option value="standard">Standard</option>
+                    <option value="optimistic">Optimiste</option>
+                    <option value="pessimistic">Pessimiste</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="studyHorizon">Horizon de calcul</label>
+                  <select id="studyHorizon">
+                    <option value="year">Année complète</option>
+                    <option value="month">Mois typique</option>
+                    <option value="day">Journée type</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="production-col">
+          <div class="card">
+            <h2>Graphiques</h2>
+            <div class="graph"><canvas id="chart" width="1100" height="320"></canvas></div>
+            <div class="legend">
+              <span><span class="dot" style="background: var(--accent);"></span> Élévation (°)</span>
+              <span><span class="dot" style="background: var(--accent-2);"></span> Azimut (°)</span>
+              <span><span class="dot" style="background: #f6c177;"></span> POA (W/m²)</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Résultats détaillés</h2>
+            <div class="warning" id="nightWarning" style="display:none;">
+              C'est la nuit : l'élévation solaire est négative, la production est nulle.
+            </div>
+            <div class="results-grid">
+              <div class="result"><div class="label">POA direct</div><div class="value" id="poaDir">--</div></div>
+              <div class="result"><div class="label">POA diffus</div><div class="value" id="poaDiff">--</div></div>
+              <div class="result"><div class="label">POA sol</div><div class="value" id="poaGround">--</div></div>
+              <div class="result"><div class="label">POA global</div><div class="value" id="poaGlobal">--</div></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Comparaison de variante</h2>
+            <p class="muted-text">Comparer une seconde orientation sur la même surface.</p>
+            <div class="form">
+              <div class="form-row">
+                <div>
+                  <label for="variantEnabled">Activer la variante</label>
+                  <select id="variantEnabled">
+                    <option value="no">Non</option>
+                    <option value="yes">Oui</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="variantTilt">Inclinaison variante (°)</label>
+                  <input type="number" id="variantTilt" value="20" step="1" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div>
+                  <label for="variantAzPanel">Azimut variante (°)</label>
+                  <input type="number" id="variantAzPanel" value="160" step="1" />
+                </div>
+                <div></div>
+              </div>
+            </div>
+            <div class="results-grid" style="margin-top:12px;">
+              <div class="result"><div class="label">Énergie annuelle variante</div><div class="value" id="variantAnnual">--</div></div>
+              <div class="result"><div class="label">Écart vs base</div><div class="value" id="variantDelta">--</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Simulation de production</h2>
+        <p class="muted-text">Basée sur une intégration horaire simplifiée + pertes typiques PVsyst.</p>
+        <div class="actions">
+          <button id="btnEnergy">Simuler la production énergétique</button>
+        </div>
+        <div class="results-grid">
+          <div class="result"><div class="label">Énergie journalière</div><div class="value" id="energyDay">--</div></div>
+          <div class="result"><div class="label">Énergie mensuelle</div><div class="value" id="energyMonth">--</div></div>
+          <div class="result"><div class="label">Énergie annuelle</div><div class="value" id="energyYear">--</div></div>
+        </div>
+        <p class="energy-note" id="lossFactor">Facteur global après pertes : -- %</p>
+        <table class="loss-table">
+          <thead>
+            <tr>
+              <th>Poste</th>
+              <th>Pertes (%)</th>
+              <th>Pertes (kWh)</th>
+              <th>Énergie restante (kWh)</th>
+            </tr>
+          </thead>
+          <tbody id="lossTableBody">
+            <tr><td colspan="4">Aucune simulation pour l'instant.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h2>Profil journalier (puissance)</h2>
+          <p class="muted-text">Profil horaire estimé à partir du modèle MeteoSwiss.</p>
+          <div class="graph small"><canvas id="dailyChart" width="520" height="240"></canvas></div>
+        </div>
+        <div class="card">
+          <h2>Profil mensuel (énergie)</h2>
+          <p class="muted-text">Estimation sur 12 mois (somme mensuelle).</p>
+          <div class="graph small"><canvas id="monthlyChart" width="520" height="240"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Indicateurs clés</h2>
+        <p class="muted-text">Synthèse destinée aux pros et aux particuliers.</p>
+        <div class="results-grid">
+          <div class="result"><div class="label">Production spécifique</div><div class="value" id="specificYield">-- kWh/kWp</div></div>
+          <div class="result"><div class="label">Performance ratio</div><div class="value" id="performanceRatio">-- %</div></div>
+          <div class="result"><div class="label">Facteur de capacité</div><div class="value" id="capacityFactor">-- %</div></div>
+          <div class="result"><div class="label">CO₂ évité</div><div class="value" id="co2Avoided">-- t/an</div></div>
+        </div>
+        <div class="actions" style="margin-top:14px;">
+          <button class="secondary" type="button" id="btnExportCsv">Exporter CSV</button>
+          <button class="secondary" type="button" id="btnExportPdf">Générer un PDF</button>
+          <button class="secondary" type="button" id="btnExportReport">Rapport client</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="tab-panel sizing-panel" id="tab-dimensionnement" role="tabpanel" data-tab="dimensionnement">
+      <div class="sizing-layout">
+        <div class="sizing-col">
+          <div class="card">
+            <h2>Contexte &amp; site</h2>
+            <p class="muted-text">Caractérisez l'emplacement pour fiabiliser le dimensionnement.</p>
+            <div class="form">
+              <div class="form-row">
+                <div>
+                  <label for="siteAltitude">Altitude (m)</label>
+                  <input type="number" id="siteAltitude" value="450" step="10" />
+                </div>
+                <div>
+                  <label for="siteType">Type de site</label>
+                  <select id="siteType">
+                    <option value="roof">Toiture</option>
+                    <option value="ground">Sol</option>
+                    <option value="carport">Carport</option>
+                    <option value="facade">Façade</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div>
+                  <label for="shadingFactor">Ombres (0-1)</label>
+                  <input type="number" id="shadingFactor" value="0.05" min="0" max="1" step="0.01" />
+                </div>
+                <div>
+                  <label for="horizonProfile">Horizon / obstacles</label>
+                  <input type="text" id="horizonProfile" placeholder="Ex: urbain, relief, arbre..." />
+                </div>
+              </div>
+              <div class="form-row">
+                <div>
+                  <label for="soilingPercent">Encrassement (%)</label>
+                  <input type="number" id="soilingPercent" value="2" min="0" max="10" step="0.5" />
+                </div>
+                <div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Paramètres PV &amp; onduleur</h2>
+            <p class="muted-text">Dimensionnement rapide des modules et de la chaîne électrique.</p>
+            <div class="form">
+              <div class="form-row">
+                <div>
+                  <label for="modulePower">Puissance module (Wc)</label>
+                  <input type="number" id="modulePower" value="420" step="5" />
+                </div>
+                <div>
+                  <label for="moduleCount">Nombre de modules</label>
+                  <input type="number" id="moduleCount" value="24" step="1" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div>
+                  <label for="dcAcRatio">Ratio DC/AC</label>
+                  <input type="number" id="dcAcRatio" value="1.2" step="0.05" />
+                </div>
+                <div>
+                  <label for="inverterEff">Rendement onduleur (%)</label>
+                  <input type="number" id="inverterEff" value="97.5" step="0.1" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div>
+                  <label for="mismatchPercent">Mismatch (%)</label>
+                  <input type="number" id="mismatchPercent" value="1.5" min="0" max="5" step="0.1" />
+                </div>
+                <div>
+                  <label for="dcLossPercent">Pertes câbles DC (%)</label>
+                  <input type="number" id="dcLossPercent" value="2" min="0" max="5" step="0.1" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div>
+                  <label for="acLossPercent">Pertes câbles AC (%)</label>
+                  <input type="number" id="acLossPercent" value="1" min="0" max="5" step="0.1" />
+                </div>
+                <div>
+                  <label for="tempCoeff">Coeff. température (%/°C)</label>
+                  <input type="number" id="tempCoeff" value="-0.35" step="0.01" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div>
+                  <label for="noct">NOCT (°C)</label>
+                  <input type="number" id="noct" value="45" step="1" />
+                </div>
+                <div>
+                  <label for="refTemp">Température référence (°C)</label>
+                  <input type="number" id="refTemp" value="25" step="1" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sizing-col">
+          <div class="card">
+            <h2>Géométrie du panneau</h2>
+            <div class="form">
+              <div>
+                <label for="tilt">Inclinaison (°)</label>
+                <input type="number" id="tilt" value="30" step="1" />
+              </div>
+              <div>
+                <label for="azPanel">Azimut panneau (°)</label>
+                <input type="number" id="azPanel" value="180" step="1" />
+              </div>
+              <div>
+                <label for="albedo">Albédo sol (0-1)</label>
+                <input type="number" id="albedo" value="0.2" min="0" max="1" step="0.05" />
+              </div>
+              <div>
+                <label for="area">Surface totale (m²)</label>
+                <input type="number" id="area" value="10" min="0.5" step="0.5" />
+              </div>
+            </div>
+            <div class="results-grid" style="margin-top:12px;">
+              <div class="result"><div class="label">Azimut soleil</div><div class="value" id="sunAz">--</div></div>
+              <div class="result"><div class="label">Élévation soleil</div><div class="value" id="sunEl">--</div></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Dimensionnement de l'installation</h2>
+            <p class="muted-text">Définissez une cible kWc et une surface dispo pour dimensionner le champ PV.</p>
+            <div class="form">
+              <div class="form-row">
+                <div>
+                  <label for="sizingTargetPower">Puissance cible (kWc)</label>
+                  <input type="number" id="sizingTargetPower" value="10" step="0.5" />
+                </div>
+                <div>
+                  <label for="sizingAvailableArea">Surface disponible (m²)</label>
+                  <input type="number" id="sizingAvailableArea" value="50" step="1" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div>
+                  <label for="sizingPanelSelect">Choix du module</label>
+                  <select id="sizingPanelSelect">
+                    <option value="auto">Auto (meilleur coût)</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="sizingDcAc">Ratio DC/AC</label>
+                  <input type="number" id="sizingDcAc" value="1.2" step="0.05" />
+                </div>
+              </div>
+            </div>
+            <div class="results-grid" style="margin-top:12px;">
+              <div class="result"><div class="label">Module choisi</div><div class="value" id="sizingPanelName">--</div></div>
+              <div class="result"><div class="label">Nombre de modules</div><div class="value" id="sizingPanelCount">--</div></div>
+              <div class="result"><div class="label">Surface estimée</div><div class="value" id="sizingTotalArea">--</div></div>
+              <div class="result"><div class="label">Coût estimé</div><div class="value" id="sizingTotalCost">--</div></div>
+              <div class="result"><div class="label">Compatibilité surface</div><div class="value" id="sizingFitStatus">--</div></div>
+            </div>
+            <p class="energy-note" id="sizingNote">Calcul basé sur les comparatifs economics et une estimation de coût moyen.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tab-panel finance-panel" id="tab-finances" role="tabpanel" data-tab="finances">
+      <div class="finance-layout">
+        <div class="finance-columns">
+          <div class="finance-col">
+            <div class="card">
+              <h2>Finances</h2>
+              <p class="muted-text">Estimez les coûts, les aides et la rentabilité en quelques hypothèses.</p>
+              <div class="results-grid">
+                <div class="result"><div class="label">Investissement net</div><div class="value" id="finNetCapex">--</div></div>
+                <div class="result"><div class="label">ROI simple</div><div class="value" id="finSimpleRoi">--</div></div>
+                <div class="result"><div class="label">Temps de retour</div><div class="value" id="finPayback">--</div></div>
+              </div>
+              <p class="energy-note">Ces valeurs seront calculées automatiquement à partir des hypothèses ci-dessous.</p>
+              <div class="actions">
+                <button class="secondary" type="button" id="btnFinanceCsv">Exporter CSV</button>
+                <button class="secondary" type="button" id="btnFinancePdf">Exporter PDF</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <h2>Aides &amp; revenus</h2>
+              <p class="muted-text">Subventions, prix de rachat et autoconsommation.</p>
+              <div class="form">
+                <div class="form-row">
+                  <div>
+                    <label for="subsidyPercent">Subvention (%)</label>
+                    <input type="number" id="subsidyPercent" value="10" min="0" max="100" step="1" />
+                  </div>
+                  <div>
+                    <label for="subsidyFixed">Prime fixe (CHF)</label>
+                    <input type="number" id="subsidyFixed" value="0" step="100" />
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div>
+                    <label for="selfConsumption">Autoconsommation (%)</label>
+                    <input type="number" id="selfConsumption" value="45" min="0" max="100" step="1" />
+                  </div>
+                  <div>
+                    <label for="feedInTariff">Tarif de rachat (CHF/kWh)</label>
+                    <input type="number" id="feedInTariff" value="0.12" step="0.01" />
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div>
+                    <label for="electricityPrice">Prix électricité évitée (CHF/kWh)</label>
+                    <input type="number" id="electricityPrice" value="0.28" step="0.01" />
+                  </div>
+                  <div>
+                    <label for="priceEscalation">Inflation énergie (%/an)</label>
+                    <input type="number" id="priceEscalation" value="2" step="0.5" />
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div>
+                    <label for="annualProduction">Production annuelle (kWh)</label>
+                    <input type="number" id="annualProduction" placeholder="Auto depuis simulation" step="100" />
+                  </div>
+                  <div>
+                    <label for="dailyConsumption">Consommation journalière (kWh)</label>
+                    <input type="number" id="dailyConsumption" value="18" step="1" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="finance-col">
+            <div class="card">
+              <h2>Hypothèses CAPEX</h2>
+              <p class="muted-text">Coûts d'achat et d'installation (hors subventions).</p>
+              <div class="form">
+                <div class="form-row">
+                  <div>
+                    <label for="capexPerKwp">CAPEX (CHF/kWc)</label>
+                    <input type="number" id="capexPerKwp" value="1400" step="50" />
+                  </div>
+                  <div>
+                    <label for="installedPower">Puissance installée (kWc)</label>
+                    <input type="number" id="installedPower" value="10" step="0.5" />
+                  </div>
+                </div>
+            <div class="form-row">
+              <div>
+                <label for="gridConnection">Raccordement (CHF)</label>
+                <input type="number" id="gridConnection" value="1500" step="100" />
+              </div>
+              <div>
+                <label for="engineering">Ingénierie &amp; permis (CHF)</label>
+                <input type="number" id="engineering" value="1200" step="100" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label for="initialInvestment">Investissement de départ (CHF)</label>
+                <input type="number" id="initialInvestment" placeholder="Override du calcul" step="500" />
+              </div>
+              <div></div>
+            </div>
+          </div>
+        </div>
+
+            <div class="card">
+              <h2>OPEX &amp; maintenance</h2>
+              <p class="muted-text">Coûts annuels, assurance et remplacement.</p>
+              <div class="form">
+                <div class="form-row">
+                  <div>
+                    <label for="opexFixed">OPEX fixe (CHF/an)</label>
+                    <input type="number" id="opexFixed" value="250" step="50" />
+                  </div>
+                  <div>
+                    <label for="opexPercent">OPEX (% CAPEX/an)</label>
+                    <input type="number" id="opexPercent" value="1.5" step="0.1" />
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div>
+                    <label for="insurance">Assurance (CHF/an)</label>
+                    <input type="number" id="insurance" value="120" step="20" />
+                  </div>
+                  <div>
+                    <label for="inverterReplacement">Remplacement onduleur (CHF)</label>
+                    <input type="number" id="inverterReplacement" value="2000" step="200" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <h2>Indicateurs financiers</h2>
+              <p class="muted-text">Synthèse simple des gains et coûts.</p>
+              <div class="results-grid">
+                <div class="result"><div class="label">Revenu annuel</div><div class="value" id="finAnnualRevenue">--</div></div>
+                <div class="result"><div class="label">Économies annuelles</div><div class="value" id="finAnnualSavings">--</div></div>
+                <div class="result"><div class="label">Cash-flow net</div><div class="value" id="finNetCashflow">--</div></div>
+                <div class="result"><div class="label">Taux de rentabilité</div><div class="value" id="finIrr">--</div></div>
+              </div>
+              <p class="energy-note">Prochaine étape : calculer ces valeurs depuis la production simulée.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Références matériel (economics)</h2>
+          <p class="muted-text">Extraits des comparatifs du dossier <code>helios/economics</code>.</p>
+
+          <div class="section-title">Panneaux photovoltaïques</div>
+          <div class="table-scroll">
+            <table class="loss-table">
+              <thead>
+                <tr>
+                  <th>Marque</th>
+                  <th>Modèle</th>
+                  <th>Puissance</th>
+                  <th>Prix estimé</th>
+                </tr>
+              </thead>
+              <tbody id="panelsTableBody">
+                <tr><td colspan="4">Chargement des données...</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="section-title">Onduleurs</div>
+          <div class="table-scroll">
+            <table class="loss-table">
+              <thead>
+                <tr>
+                  <th>Marque</th>
+                  <th>Modèle</th>
+                  <th>Type</th>
+                  <th>Puissance AC</th>
+                  <th>Rendement</th>
+                </tr>
+              </thead>
+              <tbody id="invertersTableBody">
+                <tr><td colspan="5">Chargement des données...</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="section-title">Batteries</div>
+          <div class="table-scroll">
+            <table class="loss-table">
+              <thead>
+                <tr>
+                  <th>Marque</th>
+                  <th>Modèle</th>
+                  <th>Capacité (kWh)</th>
+                  <th>Chimie</th>
+                  <th>DoD</th>
+                </tr>
+              </thead>
+              <tbody id="batteriesTableBody">
+                <tr><td colspan="5">Chargement des données...</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p class="energy-note">Sources : <code>Comparatif de 20 panneaux photovoltaïques.csv</code>, <code>Comparatif de 10 onduleurs.csv</code>, <code>Comparatif de 10 batteries.csv</code>.</p>
+        </div>
+
+        <div class="card">
+          <h2>Recommandations automatiques</h2>
+          <p class="muted-text">Sélection basée sur les hypothèses financières et les comparatifs economics.</p>
+          <div class="results-grid" style="margin-top:12px;">
+            <div class="result"><div class="label">Panneau recommandé</div><div class="value" id="recPanel">--</div></div>
+            <div class="result"><div class="label">Coût estimé panneaux</div><div class="value" id="recPanelCost">--</div></div>
+            <div class="result"><div class="label">Surface estimée</div><div class="value" id="recPanelArea">--</div></div>
+            <div class="result"><div class="label">Onduleur recommandé</div><div class="value" id="recInverter">--</div></div>
+            <div class="result"><div class="label">Batterie recommandée</div><div class="value" id="recBattery">--</div></div>
+          </div>
+          <p class="energy-note">Les recommandations sont indicatives et nécessitent une validation technique.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="tab-panel param-panel" id="tab-parametres" role="tabpanel" data-tab="parametres">
+      <div class="grid">
+        <div class="card">
+          <h2>Préférences générales</h2>
+          <p class="muted-text">Ces paramètres servent de presets pour les simulations.</p>
+          <div class="form">
+            <div class="form-row">
+              <div>
+                <label for="prefWeatherSource">Source météo par défaut</label>
+                <select id="prefWeatherSource">
+                  <option value="clear_sky">Ciel clair (offline)</option>
+                  <option value="meteoswiss">MeteoSwiss (temps réel)</option>
+                </select>
+              </div>
+              <div>
+                <label for="prefScenarioType">Scénario principal</label>
+                <select id="prefScenarioType">
+                  <option value="standard">Standard</option>
+                  <option value="optimistic">Optimiste</option>
+                  <option value="pessimistic">Pessimiste</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label for="prefStudyHorizon">Horizon par défaut</label>
+                <select id="prefStudyHorizon">
+                  <option value="year">Année complète</option>
+                  <option value="month">Mois typique</option>
+                  <option value="day">Journée type</option>
+                </select>
+              </div>
+              <div>
+                <label for="prefUnitSystem">Unités d'affichage</label>
+                <select id="prefUnitSystem">
+                  <option value="metric">SI (kWh, W/m², °C)</option>
+                  <option value="metric_short">SI compact</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label for="prefUnitLock">Conversion auto des unités</label>
+                <select id="prefUnitLock">
+                  <option value="off">Désactivée</option>
+                  <option value="on">Activée</option>
+                </select>
+              </div>
+              <div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Pertes par défaut</h2>
+          <p class="muted-text">Valeurs appliquées lorsque vous cliquez sur “Appliquer”.</p>
+          <div class="form">
+            <div class="form-row">
+              <div>
+                <label for="prefSoiling">Encrassement (%)</label>
+                <input type="number" id="prefSoiling" step="0.5" min="0" max="10" />
+              </div>
+              <div>
+                <label for="prefShading">Ombres (0-1)</label>
+                <input type="number" id="prefShading" step="0.01" min="0" max="1" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label for="prefMismatch">Mismatch (%)</label>
+                <input type="number" id="prefMismatch" step="0.1" min="0" max="5" />
+              </div>
+              <div>
+                <label for="prefInverterEff">Rendement onduleur (%)</label>
+                <input type="number" id="prefInverterEff" step="0.1" min="90" max="99" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label for="prefDcLoss">Pertes câbles DC (%)</label>
+                <input type="number" id="prefDcLoss" step="0.1" min="0" max="5" />
+              </div>
+              <div>
+                <label for="prefAcLoss">Pertes câbles AC (%)</label>
+                <input type="number" id="prefAcLoss" step="0.1" min="0" max="5" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Etat des données economics</h2>
+          <p class="muted-text">Vérifie la fraîcheur et le chargement des tables.</p>
+          <div class="results-grid">
+            <div class="result"><div class="label">Panneaux chargés</div><div class="value" id="econPanelsCount">--</div></div>
+            <div class="result"><div class="label">Onduleurs chargés</div><div class="value" id="econInvertersCount">--</div></div>
+            <div class="result"><div class="label">Batteries chargées</div><div class="value" id="econBatteriesCount">--</div></div>
+            <div class="result"><div class="label">Dernier refresh</div><div class="value" id="econLastRefresh">--</div></div>
+          </div>
+        </div>
+
+        <div class="card span-2">
+          <h2>Presets &amp; profils</h2>
+          <p class="muted-text">Applique des profils, sauvegarde les valeurs, et pousse les presets vers les champs actifs.</p>
+          <div class="form">
+            <div class="form-row">
+              <div>
+                <label for="prefProfile">Profil rapide</label>
+                <select id="prefProfile">
+                  <option value="">-- Choisir --</option>
+                  <option value="residential">Résidentiel</option>
+                  <option value="commercial">Commercial</option>
+                </select>
+              </div>
+              <div></div>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="secondary" type="button" id="btnApplyParams">Appliquer aux champs actifs</button>
+            <button class="secondary" type="button" id="btnLoadParams">Charger depuis les champs</button>
+            <button class="secondary" type="button" id="btnSavePrefs">Sauvegarder</button>
+            <button class="secondary" type="button" id="btnLoadPrefs">Charger</button>
+            <button class="secondary" type="button" id="btnResetPrefs">Réinitialiser</button>
+            <button class="secondary" type="button" id="btnReloadEconomics">Recharger economics</button>
+          </div>
+          <p class="energy-note">Conseil : utilisez “Charger depuis les champs” après avoir réglé la page Simulation.</p>
+          <p class="energy-note" id="presetStatus">Aucun preset appliqué.</p>
+        </div>
+
+        <div class="card span-2">
+          <h2>Alertes &amp; seuils</h2>
+          <p class="muted-text">Signale les valeurs anormales.</p>
+          <div class="form">
+            <div class="form-row">
+              <div>
+                <label for="alertMaxLoss">Pertes max (%)</label>
+                <input type="number" id="alertMaxLoss" value="20" step="1" min="0" max="100" />
+              </div>
+              <div>
+                <label for="alertMaxPayback">Temps retour max (ans)</label>
+                <input type="number" id="alertMaxPayback" value="15" step="1" min="1" max="50" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label for="alertMinProduction">Production annuelle min (kWh)</label>
+                <input type="number" id="alertMinProduction" value="0" step="100" min="0" />
+              </div>
+              <div></div>
+            </div>
+          </div>
+          <p class="energy-note" id="alertStatus">Aucune alerte.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="reportModal">
+    <div class="modal">
+      <h2>Exporter un rapport</h2>
+      <p class="muted-text">Choisissez le format et le contenu à inclure.</p>
+      <div class="modal-grid">
+        <div class="option-row">
+          <label for="reportFormat">Format</label>
+          <select id="reportFormat">
+            <option value="pdf">PDF</option>
+            <option value="csv">CSV</option>
+          </select>
+        </div>
+        <div class="option-row">
+          <label>Inclure simulation</label>
+          <input type="checkbox" id="reportIncludeSimulation" checked />
+        </div>
+        <div class="option-row">
+          <label>Inclure dimensionnement</label>
+          <input type="checkbox" id="reportIncludeSizing" checked />
+        </div>
+        <div class="option-row">
+          <label>Inclure finances</label>
+          <input type="checkbox" id="reportIncludeFinance" checked />
+        </div>
+        <div class="option-row">
+          <label>Inclure paramètres</label>
+          <input type="checkbox" id="reportIncludeParams" />
+        </div>
+        <div class="option-row">
+          <label>Inclure graphiques</label>
+          <input type="checkbox" id="reportIncludeGraphs" />
+        </div>
+      </div>
+      <div class="actions">
+        <button class="secondary" type="button" id="btnReportCancel">Annuler</button>
+        <button type="button" id="btnReportGenerate">Générer</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const deg2rad = (deg) => deg * Math.PI / 180;
+    const rad2deg = (rad) => rad * 180 / Math.PI;
+
+    function dayOfYear(date) {
+      const start = new Date(Date.UTC(date.getFullYear(), 0, 0));
+      const diff = date - start;
+      return Math.floor(diff / 86400000);
+    }
+
+    function computeSunPosition(date, latDeg, lonDeg, tzHours) {
+      const n = dayOfYear(date);
+      const dec = deg2rad(23.45) * Math.sin(deg2rad((360 / 365) * (284 + n)));
+
+      const hoursLocal = date.getHours() + date.getMinutes() / 60 + date.getSeconds() / 3600;
+      const solarTime = hoursLocal - tzHours + lonDeg / 15; // approximation
+      const hra = deg2rad(15 * (solarTime - 12));
+
+      const lat = deg2rad(latDeg);
+      const elev = Math.asin(Math.sin(lat) * Math.sin(dec) + Math.cos(lat) * Math.cos(dec) * Math.cos(hra));
+      const az = Math.atan2(-Math.sin(hra), Math.tan(dec) * Math.cos(lat) - Math.sin(lat) * Math.cos(hra));
+
+      let azimuth = rad2deg(az);
+      if (azimuth < 0) azimuth += 360;
+
+      return {
+        azimuthDeg: azimuth,
+        elevationDeg: rad2deg(elev),
+      };
+    }
+
+    function computeIrradiance(elevationDeg, azSunDeg, tiltDeg, azPanelDeg, albedo = 0.2) {
+      const elevRad = deg2rad(Math.max(elevationDeg, 0));
+      const tilt = deg2rad(tiltDeg);
+      const azSun = deg2rad(azSunDeg);
+      const azPanel = deg2rad(azPanelDeg);
+
+      const ghi = Math.max(0, 1000 * Math.sin(elevRad));
+      const dhi = ghi * 0.15;
+      const dni = (ghi - dhi) / Math.max(0.1, Math.cos(Math.PI / 2 - elevRad));
+
+      const cosIncidence = Math.max(
+        0,
+        Math.sin(elevRad) * Math.cos(tilt) + Math.cos(elevRad) * Math.sin(tilt) * Math.cos(azSun - azPanel)
+      );
+      const poaDirect = dni * cosIncidence;
+      const poaDiffuse = dhi * (1 + Math.cos(tilt)) / 2;
+      const poaGround = ghi * albedo * (1 - Math.cos(tilt)) / 2;
+      const poaGlobal = poaDirect + poaDiffuse + poaGround;
+
+      return { poaDirect, poaDiffuse, poaGround, poaGlobal, ghi };
+    }
+
+    const baseLosses = [];
+
+    const METEOSWISS_ENDPOINT = "/api/meteo";
+    const CO2_FACTOR_T_PER_MWH = 0.1;
+    const EUR_TO_CHF = 1.07;
+    const weatherStations = [
+      { code: "GVE", name: "Genève Cointrin", lat: 46.25, lon: 6.13, altitude: 420 },
+      { code: "BER", name: "Bern Zollikofen", lat: 46.99, lon: 7.46, altitude: 552 },
+      { code: "BAS", name: "Bâle/EuroAirport", lat: 47.59, lon: 7.63, altitude: 316 },
+      { code: "ZRH", name: "Zürich Fluntern", lat: 47.38, lon: 8.56, altitude: 556 },
+      { code: "LUG", name: "Lugano", lat: 46.00, lon: 8.96, altitude: 273 },
+      { code: "DAV", name: "Davos", lat: 46.81, lon: 9.84, altitude: 1594 },
+    ];
+
+    let panelsCatalog = [];
+    let invertersCatalog = [];
+    let batteriesCatalog = [];
+
+    let cachedWeather = null;
+
+    const toRad = (deg) => deg * Math.PI / 180;
+    function haversineDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+      return 2 * R * Math.asin(Math.sqrt(a));
+    }
+
+    function findClosestStation(lat, lon) {
+      return weatherStations.reduce((closest, station) => {
+        if (!closest) return station;
+        const current = haversineDistance(lat, lon, station.lat, station.lon);
+        const best = haversineDistance(lat, lon, closest.lat, closest.lon);
+        return current < best ? station : closest;
+      }, weatherStations[0]);
+    }
+
+    function parseNumber(value) {
+      if (value == null) return null;
+      const num = Number(String(value).replace(",", ".").replace(/[^\d.\-]/g, ""));
+      return Number.isFinite(num) ? num : null;
+    }
+
+    function parseFirstNumber(value) {
+      if (value == null) return null;
+      const match = String(value).replace(",", ".").match(/-?\d+(?:\.\d+)?/);
+      if (!match) return null;
+      const num = Number(match[0]);
+      return Number.isFinite(num) ? num : null;
+    }
+
+    function parseCsv(text, delimiter) {
+      const rows = [];
+      let current = "";
+      let inQuotes = false;
+      const pushCell = (row) => {
+        row.push(current);
+        current = "";
+      };
+      let row = [];
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        const next = text[i + 1];
+        if (ch === '"' && next === '"') {
+          current += '"';
+          i += 1;
+          continue;
+        }
+        if (ch === '"') {
+          inQuotes = !inQuotes;
+          continue;
+        }
+        if (!inQuotes && ch === delimiter) {
+          pushCell(row);
+          continue;
+        }
+        if (!inQuotes && (ch === "\n" || ch === "\r")) {
+          if (ch === "\r" && next === "\n") i += 1;
+          pushCell(row);
+          if (row.length > 1 || row[0] !== "") {
+            rows.push(row.map(cell => cell.trim()));
+          }
+          row = [];
+          continue;
+        }
+        current += ch;
+      }
+      if (current.length || row.length) {
+        pushCell(row);
+        rows.push(row.map(cell => cell.trim()));
+      }
+      return rows;
+    }
+
+    function setTableRows(tbodyId, rows, colCount) {
+      const body = document.getElementById(tbodyId);
+      if (!body) return;
+      if (!rows.length) {
+        body.innerHTML = `<tr><td colspan="${colCount}">Aucune donnée.</td></tr>`;
+        return;
+      }
+      body.innerHTML = rows.map(row => `<tr>${row.map(cell => `<td>${cell}</td>`).join("")}</tr>`).join("");
+    }
+
+    async function fetchCsv(path, encoding = "utf-8") {
+      const res = await fetch(path);
+      if (!res.ok) throw new Error(`Erreur chargement ${path}`);
+      const buf = await res.arrayBuffer();
+      return new TextDecoder(encoding).decode(buf);
+    }
+
+    function parsePanelsCsv(rows) {
+      const headerIdx = rows.findIndex(r => r.some(cell => cell.toLowerCase() === "marque"));
+      if (headerIdx === -1) return [];
+      const header = rows[headerIdx].map(cell => cell.toLowerCase());
+      const data = rows.slice(headerIdx + 1).filter(r => r[0] && /^\d+/.test(r[0]));
+      const idx = {
+        brand: header.indexOf("marque"),
+        model: header.indexOf("modèle"),
+        dims: header.indexOf("dimensions (mm)"),
+        power: header.indexOf("puissance"),
+        price: header.indexOf("prix unitaire estimé"),
+      };
+      return data.map(r => ({
+        brand: r[idx.brand] || "",
+        model: r[idx.model] || "",
+        dims: r[idx.dims] || "",
+        power: r[idx.power] || "",
+        price: r[idx.price] || "",
+      })).filter(r => r.brand || r.model);
+    }
+
+    function parseInvertersCsv(rows) {
+      const header = rows[0]?.map(cell => cell.toLowerCase()) || [];
+      const headerClean = header.map(cell => cell.replace(/\s+/g, ""));
+      const idx = {
+        brand: headerClean.findIndex(cell => cell.includes("marque")),
+        model: headerClean.findIndex(cell => cell.includes("modèle")),
+        type: headerClean.findIndex(cell => cell.includes("type")),
+        power: headerClean.findIndex(cell => cell.includes("puissance")),
+        efficiency: headerClean.findIndex(cell => cell.includes("efficacité")),
+      };
+      return rows.slice(1).map(r => ({
+        brand: r[idx.brand] || "",
+        model: r[idx.model] || "",
+        type: r[idx.type] || "",
+        power: r[idx.power] || "",
+        efficiency: r[idx.efficiency] || "",
+      })).filter(r => r.brand || r.model);
+    }
+
+    function parseBatteriesCsv(rows) {
+      const header = rows[0]?.map(cell => cell.toLowerCase()) || [];
+      const idx = {
+        brand: header.findIndex(cell => cell.includes("marque")),
+        model: header.findIndex(cell => cell.includes("modèle")),
+        capacity: header.findIndex(cell => cell.includes("capacité")),
+        chemistry: header.findIndex(cell => cell.includes("chimie")),
+        dod: header.findIndex(cell => cell.includes("profondeur")),
+      };
+      return rows.slice(1).map(r => ({
+        brand: r[idx.brand] || "",
+        model: r[idx.model] || "",
+        capacity: r[idx.capacity] || "",
+        chemistry: r[idx.chemistry] || "",
+        dod: r[idx.dod] || "",
+      })).filter(r => r.brand || r.model);
+    }
+
+    function updateEconomicsTables() {
+      const { powerKw: installedPower, source } = getInstalledPowerDetails();
+      const siteArea = parseNumber(document.getElementById("area")?.value);
+      const dailyConsumption = parseNumber(document.getElementById("dailyConsumption")?.value) || 0;
+
+      const panelOptions = panelsCatalog.map(panel => {
+        const areaM2 = parsePanelAreaM2(panel.dims);
+        const priceEur = parseRangeAverage(panel.priceEur);
+        if (!panel.powerW || !priceEur) return null;
+        const priceChf = priceEur * EUR_TO_CHF;
+        const requiredPanels = installedPower > 0 ? Math.ceil((installedPower * 1000) / panel.powerW) : 0;
+        const totalArea = areaM2 && requiredPanels ? requiredPanels * areaM2 : null;
+        const totalCost = requiredPanels * priceChf;
+        const fits = siteArea && totalArea ? totalArea <= siteArea + 1e-6 : true;
+        return { panel, totalCost, fits, totalArea, requiredPanels };
+      }).filter(Boolean);
+
+      panelOptions.sort((a, b) => {
+        if (a.fits !== b.fits) return a.fits ? -1 : 1;
+        return a.totalCost - b.totalCost;
+      });
+
+      const panelRows = panelOptions.slice(0, 3).map(item => [
+        item.panel.brand,
+        item.panel.model,
+        item.panel.powerLabel || `${item.panel.powerW} W`,
+        item.panel.priceLabel || "--",
+      ]);
+      setTableRows("panelsTableBody", panelRows, 4);
+
+      const inverterOptions = invertersCatalog
+        .map(inv => {
+          const powerKw = parsePowerKw(inv.power);
+          if (!powerKw) return null;
+          return { inv, powerKw };
+        })
+        .filter(Boolean)
+        .sort((a, b) => Math.abs(a.powerKw - installedPower) - Math.abs(b.powerKw - installedPower));
+
+      const inverterRows = inverterOptions.slice(0, 3).map(item => [
+        item.inv.brand,
+        item.inv.model,
+        item.inv.type,
+        item.inv.power,
+        item.inv.efficiency,
+      ]);
+      setTableRows("invertersTableBody", inverterRows, 5);
+
+      const requiredCapacity = dailyConsumption > 0 ? dailyConsumption * 1.2 : null;
+      const batteryOptions = batteriesCatalog
+        .map(bat => {
+          const capacity = parseRangeAverage(bat.capacity);
+          if (!capacity) return null;
+          return { bat, capacity };
+        })
+        .filter(Boolean)
+        .sort((a, b) => {
+          if (!requiredCapacity) return a.capacity - b.capacity;
+          return Math.abs(a.capacity - requiredCapacity) - Math.abs(b.capacity - requiredCapacity);
+        });
+
+      const batteryRows = batteryOptions.slice(0, 3).map(item => [
+        item.bat.brand,
+        item.bat.model,
+        item.bat.capacity,
+        item.bat.chemistry,
+        item.bat.dod,
+      ]);
+      setTableRows("batteriesTableBody", batteryRows, 5);
+    }
+
+    function updateSizingPanelSelect() {
+      const select = document.getElementById("sizingPanelSelect");
+      if (!select) return;
+      const current = select.value;
+      select.innerHTML = '<option value="auto">Auto (meilleur coût)</option>';
+      panelsCatalog.forEach((panel, idx) => {
+        if (!panel.brand || !panel.model) return;
+        const label = `${panel.brand} ${panel.model} (${panel.powerLabel || panel.powerW + " W"})`;
+        const option = document.createElement("option");
+        option.value = String(idx);
+        option.textContent = label;
+        select.appendChild(option);
+      });
+      if (current && [...select.options].some(opt => opt.value === current)) {
+        select.value = current;
+      }
+    }
+
+    function computeSizingCandidate(panel, targetKw) {
+      const areaM2 = parsePanelAreaM2(panel.dims);
+      const priceEur = parseRangeAverage(panel.priceEur);
+      if (!panel.powerW || !priceEur || !areaM2) return null;
+      const requiredPanels = Math.ceil((targetKw * 1000) / panel.powerW);
+      const totalArea = requiredPanels * areaM2;
+      const totalCost = requiredPanels * priceEur * EUR_TO_CHF;
+      return { panel, requiredPanels, totalArea, totalCost };
+    }
+
+    function updateSizingResults() {
+      const targetKw = parseNumber(document.getElementById("sizingTargetPower")?.value) || 0;
+      const availableArea = parseNumber(document.getElementById("sizingAvailableArea")?.value) || 0;
+      const panelSelect = document.getElementById("sizingPanelSelect");
+      const panelChoice = panelSelect ? panelSelect.value : "auto";
+
+      let candidate = null;
+      if (panelChoice !== "auto" && panelsCatalog[Number(panelChoice)]) {
+        candidate = computeSizingCandidate(panelsCatalog[Number(panelChoice)], targetKw);
+      } else {
+        const candidates = panelsCatalog
+          .map(panel => computeSizingCandidate(panel, targetKw))
+          .filter(Boolean);
+        const fits = candidates.filter(c => availableArea > 0 ? c.totalArea <= availableArea + 1e-6 : true);
+        const list = fits.length ? fits : candidates.map(c => ({
+          ...c,
+          areaOver: availableArea > 0 ? c.totalArea - availableArea : 0,
+        }));
+        list.sort((a, b) => {
+          if (fits.length) {
+            return a.totalCost - b.totalCost;
+          }
+          return a.areaOver - b.areaOver;
+        });
+        candidate = list[0] || null;
+      }
+
+      const setValue = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
+      };
+
+      if (!candidate || targetKw <= 0) {
+        setValue("sizingPanelName", "--");
+        setValue("sizingPanelCount", "--");
+        setValue("sizingTotalArea", "--");
+        setValue("sizingTotalCost", "--");
+        setValue("sizingFitStatus", "--");
+        return;
+      }
+
+      const fits = availableArea > 0 ? candidate.totalArea <= availableArea + 1e-6 : true;
+      setValue("sizingPanelName", `${candidate.panel.brand} ${candidate.panel.model}`);
+      setValue("sizingPanelCount", String(candidate.requiredPanels));
+      setValue("sizingTotalArea", `${candidate.totalArea.toFixed(1)} m²`);
+      setValue("sizingTotalCost", formatCurrency(candidate.totalCost));
+      setValue("sizingFitStatus", fits ? "OK" : "Dépassement");
+    }
+
+    async function loadEconomicsData() {
+      try {
+        const panelsText = await fetchCsv("/api/economics?kind=panels", "windows-1252");
+        const panelsRows = parseCsv(panelsText, ";");
+        const panels = parsePanelsCsv(panelsRows);
+        panelsCatalog = panels.map(p => ({
+          brand: p.brand,
+          model: p.model,
+          powerW: parseRangeAverage(p.power) || parseFirstNumber(p.power) || 0,
+          powerLabel: p.power,
+          dims: p.dims,
+          priceEur: p.price.replace("€", "").trim(),
+          priceLabel: p.price,
+        }));
+      } catch (err) {
+        console.warn("Panels CSV", err);
+        panelsCatalog = [];
+      }
+
+      try {
+        const invText = await fetchCsv("/api/economics?kind=inverters");
+        const invRows = parseCsv(invText, ",");
+        const inverters = parseInvertersCsv(invRows);
+        invertersCatalog = inverters.map(i => ({
+          brand: i.brand,
+          model: i.model,
+          type: i.type,
+          power: i.power,
+          efficiency: i.efficiency,
+        }));
+      } catch (err) {
+        console.warn("Inverters CSV", err);
+        invertersCatalog = [];
+      }
+
+      try {
+        const batText = await fetchCsv("/api/economics?kind=batteries");
+        const batRows = parseCsv(batText, ",");
+        const batteries = parseBatteriesCsv(batRows);
+        batteriesCatalog = batteries.map(b => ({
+          brand: b.brand,
+          model: b.model,
+          capacity: b.capacity,
+          chemistry: b.chemistry,
+          dod: b.dod,
+        }));
+      } catch (err) {
+        console.warn("Batteries CSV", err);
+        batteriesCatalog = [];
+      }
+
+      lastEconomicsRefresh = new Date().toLocaleString("fr-CH");
+      updateEconomicsStatus();
+      updateEconomicsTables();
+      updateRecommendations();
+      updateSizingPanelSelect();
+      updateSizingResults();
+      const presetStatus = document.getElementById("presetStatus");
+      if (presetStatus) presetStatus.textContent = "Données economics rechargées.";
+    }
+
+    function parseRangeAverage(value) {
+      if (!value) return null;
+      const parts = String(value).split("-").map(p => parseFirstNumber(p)).filter(v => v != null);
+      if (!parts.length) return null;
+      if (parts.length === 1) return parts[0];
+      return (parts[0] + parts[1]) / 2;
+    }
+
+    function parsePanelAreaM2(dims) {
+      const nums = String(dims || "").match(/[\d\.]+/g);
+      if (!nums || nums.length < 2) return null;
+      const widthMm = parseNumber(nums[0]);
+      const heightMm = parseNumber(nums[1]);
+      if (!widthMm || !heightMm) return null;
+      return (widthMm / 1000) * (heightMm / 1000);
+    }
+
+    function parsePowerKw(value) {
+      const num = parseRangeAverage(value);
+      if (num == null) return null;
+      if (/va/i.test(value)) return num / 1000;
+      if (/kw/i.test(value)) return num;
+      if (/kva/i.test(value)) return num;
+      if (/w/i.test(value)) return num / 1000;
+      return num;
+    }
+
+    function formatCurrency(value, unit = "CHF") {
+      if (!Number.isFinite(value)) return "--";
+      return `${value.toFixed(0)} ${unit}`;
+    }
+
+    function formatPercent(value) {
+      if (!Number.isFinite(value)) return "--";
+      return `${(value * 100).toFixed(1)} %`;
+    }
+
+    function getAnnualProduction() {
+      const manual = parseNumber(document.getElementById("annualProduction")?.value);
+      if (Number.isFinite(manual) && manual > 0) return manual;
+      const text = document.getElementById("energyYear")?.textContent || "";
+      const fromSim = parseNumber(text);
+      return Number.isFinite(fromSim) && fromSim > 0 ? fromSim : null;
+    }
+
+    function getInstalledPowerKw() {
+      const financePower = parseNumber(document.getElementById("installedPower")?.value);
+      if (Number.isFinite(financePower) && financePower > 0) return financePower;
+      const modulePower = parseNumber(document.getElementById("modulePower")?.value);
+      const moduleCount = parseNumber(document.getElementById("moduleCount")?.value);
+      if (Number.isFinite(modulePower) && Number.isFinite(moduleCount) && moduleCount > 0) {
+        return (modulePower * moduleCount) / 1000;
+      }
+      return 0;
+    }
+
+    function getInstalledPowerDetails() {
+      const financePower = parseNumber(document.getElementById("installedPower")?.value);
+      if (Number.isFinite(financePower) && financePower > 0) {
+        return { powerKw: financePower, source: "finance" };
+      }
+      const modulePower = parseNumber(document.getElementById("modulePower")?.value);
+      const moduleCount = parseNumber(document.getElementById("moduleCount")?.value);
+      if (Number.isFinite(modulePower) && Number.isFinite(moduleCount) && moduleCount > 0) {
+        return { powerKw: (modulePower * moduleCount) / 1000, source: "production" };
+      }
+      return { powerKw: 0, source: "unknown" };
+    }
+
+    function updateFinanceSummary() {
+      const capexPerKwp = parseNumber(document.getElementById("capexPerKwp")?.value) || 0;
+      const installedPower = parseNumber(document.getElementById("installedPower")?.value) || 0;
+      const gridConnection = parseNumber(document.getElementById("gridConnection")?.value) || 0;
+      const engineering = parseNumber(document.getElementById("engineering")?.value) || 0;
+      const initialInvestment = parseNumber(document.getElementById("initialInvestment")?.value);
+      const subsidyPercent = (parseNumber(document.getElementById("subsidyPercent")?.value) || 0) / 100;
+      const subsidyFixed = parseNumber(document.getElementById("subsidyFixed")?.value) || 0;
+      const selfConsumption = (parseNumber(document.getElementById("selfConsumption")?.value) || 0) / 100;
+      const feedInTariff = parseNumber(document.getElementById("feedInTariff")?.value) || 0;
+      const electricityPrice = parseNumber(document.getElementById("electricityPrice")?.value) || 0;
+      const opexFixed = parseNumber(document.getElementById("opexFixed")?.value) || 0;
+      const opexPercent = (parseNumber(document.getElementById("opexPercent")?.value) || 0) / 100;
+      const insurance = parseNumber(document.getElementById("insurance")?.value) || 0;
+      const inverterReplacement = parseNumber(document.getElementById("inverterReplacement")?.value) || 0;
+
+      const grossCapex = capexPerKwp * installedPower + gridConnection + engineering;
+      const subsidy = capexPerKwp * installedPower * subsidyPercent + subsidyFixed;
+      const netCapexCalculated = Math.max(0, grossCapex - subsidy);
+      const netCapex = initialInvestment && initialInvestment > 0 ? initialInvestment : netCapexCalculated;
+
+      const annualProduction = getAnnualProduction();
+      const productionValue = annualProduction ?? 0;
+      const revenue = productionValue * (selfConsumption * electricityPrice + (1 - selfConsumption) * feedInTariff);
+      const annualSavings = productionValue * selfConsumption * electricityPrice;
+
+      const annualOpex = opexFixed + insurance + grossCapex * opexPercent;
+      const netCashflow = revenue - annualOpex;
+
+      document.getElementById("finNetCapex").textContent = formatCurrency(netCapex);
+      document.getElementById("finAnnualRevenue").textContent = formatCurrency(revenue, "CHF/an");
+      document.getElementById("finAnnualSavings").textContent = formatCurrency(annualSavings, "CHF/an");
+      document.getElementById("finNetCashflow").textContent = formatCurrency(netCashflow, "CHF/an");
+
+      if (netCapex > 0) {
+        const roi = netCashflow / netCapex;
+        document.getElementById("finSimpleRoi").textContent = formatPercent(roi);
+        document.getElementById("finIrr").textContent = formatPercent(roi);
+        if (netCashflow > 0) {
+          const payback = netCapex / netCashflow;
+          document.getElementById("finPayback").textContent = `${payback.toFixed(1)} ans`;
+        } else {
+          document.getElementById("finPayback").textContent = "--";
+        }
+      } else {
+        document.getElementById("finPayback").textContent = "--";
+        document.getElementById("finSimpleRoi").textContent = "--";
+        document.getElementById("finIrr").textContent = "--";
+      }
+
+      lastFinance = {
+        timestamp: new Date().toISOString(),
+        inputs: {
+          capexPerKwp,
+          installedPower,
+          gridConnection,
+          engineering,
+          initialInvestment,
+          subsidyPercent,
+          subsidyFixed,
+          selfConsumption,
+          feedInTariff,
+          electricityPrice,
+          priceEscalation: parseNumber(document.getElementById("priceEscalation")?.value) || 0,
+          annualProduction,
+          dailyConsumption: parseNumber(document.getElementById("dailyConsumption")?.value) || 0,
+          opexFixed,
+          opexPercent,
+          insurance,
+          inverterReplacement,
+        },
+        computed: {
+          grossCapex,
+          subsidy,
+          netCapex,
+          revenue,
+          annualSavings,
+          annualOpex,
+          netCashflow,
+        },
+      };
+      updateAlertStatus();
+    }
+
+    function updateRecommendations() {
+      const { powerKw: installedPower, source } = getInstalledPowerDetails();
+      const siteArea = parseNumber(document.getElementById("area")?.value);
+      const dailyConsumption = parseNumber(document.getElementById("dailyConsumption")?.value) || 0;
+
+      const panelOptions = panelsCatalog.map(panel => {
+        const areaM2 = parsePanelAreaM2(panel.dims);
+        const priceEur = parseRangeAverage(panel.priceEur);
+        if (!areaM2 || !panel.powerW || !priceEur) return null;
+        const priceChf = priceEur * EUR_TO_CHF;
+        const requiredPanels = installedPower > 0 ? Math.ceil((installedPower * 1000) / panel.powerW) : 0;
+        const totalArea = requiredPanels * areaM2;
+        const totalCost = requiredPanels * priceChf;
+        const fits = siteArea ? totalArea <= siteArea + 1e-6 : true;
+        return { panel, requiredPanels, totalArea, totalCost, fits };
+      }).filter(Boolean);
+
+      panelOptions.sort((a, b) => {
+        if (a.fits !== b.fits) return a.fits ? -1 : 1;
+        return a.totalCost - b.totalCost;
+      });
+
+      const bestPanel = panelOptions[0];
+      if (bestPanel && installedPower > 0) {
+        document.getElementById("recPanel").textContent = `${bestPanel.panel.brand} ${bestPanel.panel.model}`;
+        document.getElementById("recPanelCost").textContent = formatCurrency(bestPanel.totalCost);
+        document.getElementById("recPanelArea").textContent = `${bestPanel.totalArea.toFixed(1)} m²`;
+      } else if (bestPanel) {
+        document.getElementById("recPanel").textContent = `${bestPanel.panel.brand} ${bestPanel.panel.model}`;
+        document.getElementById("recPanelCost").textContent = "--";
+        document.getElementById("recPanelArea").textContent = "--";
+      } else {
+        document.getElementById("recPanel").textContent = "--";
+        document.getElementById("recPanelCost").textContent = "--";
+        document.getElementById("recPanelArea").textContent = "--";
+      }
+
+      const inverterOptions = invertersCatalog
+        .map(inv => {
+          const powerKw = parsePowerKw(inv.power);
+          if (!powerKw) return null;
+          return { inv, powerKw };
+        })
+        .filter(Boolean)
+        .sort((a, b) => Math.abs(a.powerKw - installedPower) - Math.abs(b.powerKw - installedPower));
+
+      if (inverterOptions.length) {
+        const chosen = inverterOptions[0];
+        document.getElementById("recInverter").textContent = `${chosen.inv.brand} ${chosen.inv.model}`;
+      } else if (invertersCatalog.length) {
+        const fallback = invertersCatalog[0];
+        document.getElementById("recInverter").textContent = `${fallback.brand} ${fallback.model}`;
+      } else {
+        document.getElementById("recInverter").textContent = "--";
+      }
+
+      const requiredCapacity = dailyConsumption > 0 ? dailyConsumption * 1.2 : null;
+      const batteryOptions = batteriesCatalog
+        .map(bat => {
+          const capacity = parseRangeAverage(bat.capacity);
+          if (!capacity) return null;
+          return { bat, capacity };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.capacity - b.capacity);
+
+      let bestBattery = null;
+      if (requiredCapacity) {
+        bestBattery = batteryOptions.find(b => b.capacity >= requiredCapacity) || batteryOptions[batteryOptions.length - 1];
+      } else if (batteryOptions.length) {
+        bestBattery = batteryOptions[0];
+      }
+
+      if (bestBattery) {
+        document.getElementById("recBattery").textContent = `${bestBattery.bat.brand} ${bestBattery.bat.model}`;
+      } else {
+        document.getElementById("recBattery").textContent = "--";
+      }
+    }
+
+    function setWeatherStatus(text, variant = "info") {
+      const el = document.getElementById("weatherStatus");
+      if (!el) return;
+      el.textContent = text;
+      el.classList.remove("info", "error", "success", "pending");
+      el.classList.add(variant);
+    }
+
+    function setWeatherDetails(data) {
+      const el = document.getElementById("weatherDetails");
+      if (!el) return;
+      if (!data) {
+        el.textContent = "Aucune donnée météo.";
+        return;
+      }
+
+      const station = data.station || {};
+      const rows = [
+        `${station.name || "Station inconnue"} (${data.source || "inconnue"})`,
+        `Horodatage : ${data.timestamp || "--"}`,
+        `Température ${formatNumber(data.temperature, 1)} °C – Humidité ${formatNumber(data.relative_humidity, 0)} %`,
+        `Vent ${formatNumber(data.wind_speed, 1)} m/s – GHI ${formatNumber(data.global_radiation, 0)} W/m²`,
+      ];
+      el.textContent = rows.join(" | ");
+    }
+
+    function loadParameterDefaultsFromInputs() {
+      let updated = 0;
+      const map = [
+        ["prefWeatherSource", "weatherSource"],
+        ["prefScenarioType", "scenarioType"],
+        ["prefStudyHorizon", "studyHorizon"],
+        ["prefSoiling", "soilingPercent"],
+        ["prefShading", "shadingFactor"],
+        ["prefMismatch", "mismatchPercent"],
+        ["prefInverterEff", "inverterEff"],
+        ["prefDcLoss", "dcLossPercent"],
+        ["prefAcLoss", "acLossPercent"],
+      ];
+      map.forEach(([prefId, sourceId]) => {
+        const pref = document.getElementById(prefId);
+        const source = document.getElementById(sourceId);
+        if (!pref || !source) return;
+        pref.value = source.value;
+        updated += 1;
+      });
+      const status = document.getElementById("presetStatus");
+      if (status) status.textContent = `${updated} réglages chargés depuis les champs.`;
+    }
+
+    function applyParameterDefaultsToInputs() {
+      let applied = 0;
+      const map = [
+        ["prefWeatherSource", "weatherSource"],
+        ["prefScenarioType", "scenarioType"],
+        ["prefStudyHorizon", "studyHorizon"],
+        ["prefSoiling", "soilingPercent"],
+        ["prefShading", "shadingFactor"],
+        ["prefMismatch", "mismatchPercent"],
+        ["prefInverterEff", "inverterEff"],
+        ["prefDcLoss", "dcLossPercent"],
+        ["prefAcLoss", "acLossPercent"],
+      ];
+      map.forEach(([prefId, targetId]) => {
+        const pref = document.getElementById(prefId);
+        const target = document.getElementById(targetId);
+        if (!pref || !target) return;
+        if (pref.value !== "") {
+          target.value = pref.value;
+          applied += 1;
+        }
+      });
+      updateFinanceSummary();
+      updateEconomicsTables();
+      updateRecommendations();
+      const status = document.getElementById("presetStatus");
+      if (status) status.textContent = `${applied} réglages appliqués aux champs.`;
+    }
+
+    function readPrefInputs() {
+      const ids = [
+        "prefWeatherSource",
+        "prefScenarioType",
+        "prefStudyHorizon",
+        "prefUnitSystem",
+        "prefUnitLock",
+        "prefSoiling",
+        "prefShading",
+        "prefMismatch",
+        "prefInverterEff",
+        "prefDcLoss",
+        "prefAcLoss",
+      ];
+      const data = {};
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) data[id] = el.value;
+      });
+      return data;
+    }
+
+    function applyPrefInputs(data) {
+      Object.entries(data || {}).forEach(([id, value]) => {
+        const el = document.getElementById(id);
+        if (el && value !== undefined && value !== null) el.value = value;
+      });
+      applyUnitSystem(false);
+    }
+
+    function savePrefsToStorage() {
+      const data = readPrefInputs();
+      localStorage.setItem(PREFS_STORAGE_KEY, JSON.stringify(data));
+      const status = document.getElementById("alertStatus");
+      if (status) status.textContent = "Presets sauvegardés.";
+      const presetStatus = document.getElementById("presetStatus");
+      if (presetStatus) presetStatus.textContent = "Presets sauvegardés.";
+    }
+
+    function loadPrefsFromStorage() {
+      const raw = localStorage.getItem(PREFS_STORAGE_KEY);
+      if (!raw) {
+        const presetStatus = document.getElementById("presetStatus");
+        if (presetStatus) presetStatus.textContent = "Aucun preset sauvegardé.";
+        return;
+      }
+      try {
+        const data = JSON.parse(raw);
+        applyPrefInputs(data);
+        const status = document.getElementById("alertStatus");
+        if (status) status.textContent = "Presets chargés.";
+        const presetStatus = document.getElementById("presetStatus");
+        if (presetStatus) presetStatus.textContent = "Presets chargés.";
+      } catch (err) {
+        console.warn("prefs load", err);
+      }
+    }
+
+    function resetPrefs() {
+      localStorage.removeItem(PREFS_STORAGE_KEY);
+      loadParameterDefaultsFromInputs();
+      const status = document.getElementById("alertStatus");
+      if (status) status.textContent = "Presets réinitialisés.";
+      const presetStatus = document.getElementById("presetStatus");
+      if (presetStatus) presetStatus.textContent = "Presets réinitialisés.";
+    }
+
+    function applyProfile(profile) {
+      const profiles = {
+        residential: {
+          capexPerKwp: 1700,
+          installedPower: 8,
+          opexFixed: 200,
+          opexPercent: 1.2,
+          inverterEff: 97.5,
+          dcLossPercent: 2,
+          acLossPercent: 1,
+          soilingPercent: 2,
+          shadingFactor: 0.05,
+        },
+        commercial: {
+          capexPerKwp: 1200,
+          installedPower: 50,
+          opexFixed: 800,
+          opexPercent: 1.0,
+          inverterEff: 98,
+          dcLossPercent: 1.5,
+          acLossPercent: 0.8,
+          soilingPercent: 1.5,
+          shadingFactor: 0.02,
+        },
+      };
+      const data = profiles[profile];
+      if (!data) return;
+      Object.entries(data).forEach(([id, value]) => {
+        const el = document.getElementById(id);
+        if (el) el.value = value;
+      });
+      loadParameterDefaultsFromInputs();
+      updateFinanceSummary();
+      updateEconomicsTables();
+      updateRecommendations();
+      const presetStatus = document.getElementById("presetStatus");
+      if (presetStatus) presetStatus.textContent = "Profil appliqué et presets mis à jour.";
+    }
+
+    function applyUnitSystem(convertValues = true) {
+      const system = document.getElementById("prefUnitSystem")?.value || "metric";
+      const lock = document.getElementById("prefUnitLock")?.value === "on";
+      const labelAnnual = document.querySelector('label[for="annualProduction"]');
+      if (labelAnnual) {
+        labelAnnual.textContent = system === "metric_short"
+          ? "Production annuelle (MWh)"
+          : "Production annuelle (kWh)";
+      }
+      if (!lock || !convertValues) return;
+      const annualInput = document.getElementById("annualProduction");
+      if (!annualInput) return;
+      const value = parseNumber(annualInput.value);
+      if (!Number.isFinite(value)) return;
+      if (system === "metric_short") {
+        annualInput.value = (value / 1000).toFixed(2);
+      } else {
+        annualInput.value = (value * 1000).toFixed(0);
+      }
+    }
+
+    function updateAlertStatus() {
+      const maxLoss = parseNumber(document.getElementById("alertMaxLoss")?.value) ?? 0;
+      const maxPayback = parseNumber(document.getElementById("alertMaxPayback")?.value) ?? 0;
+      const minProduction = parseNumber(document.getElementById("alertMinProduction")?.value) ?? 0;
+      const messages = [];
+      if (lastSimulation?.factor !== undefined) {
+        const lossPercent = (1 - lastSimulation.factor) * 100;
+        if (maxLoss > 0 && lossPercent > maxLoss) {
+          messages.push(`Pertes élevées (${lossPercent.toFixed(1)}%)`);
+        }
+      }
+      if (lastFinance?.computed?.netCapex && lastFinance?.computed?.netCashflow) {
+        const cash = lastFinance.computed.netCashflow;
+        if (cash > 0) {
+          const payback = lastFinance.computed.netCapex / cash;
+          if (maxPayback > 0 && payback > maxPayback) {
+            messages.push(`Temps de retour > ${maxPayback} ans`);
+          }
+        }
+      }
+      if (lastSimulation?.energies?.annual?.net !== undefined) {
+        const annualNet = lastSimulation.energies.annual.net;
+        if (minProduction > 0 && annualNet < minProduction) {
+          messages.push(`Production annuelle < ${minProduction} kWh`);
+        }
+      }
+      const status = document.getElementById("alertStatus");
+      if (!status) return;
+      status.textContent = messages.length ? messages.join(" • ") : "Aucune alerte.";
+    }
+
+    function updateEconomicsStatus() {
+      const panels = document.getElementById("econPanelsCount");
+      const inverters = document.getElementById("econInvertersCount");
+      const batteries = document.getElementById("econBatteriesCount");
+      const last = document.getElementById("econLastRefresh");
+      if (panels) panels.textContent = panelsCatalog.length ? String(panelsCatalog.length) : "--";
+      if (inverters) inverters.textContent = invertersCatalog.length ? String(invertersCatalog.length) : "--";
+      if (batteries) batteries.textContent = batteriesCatalog.length ? String(batteriesCatalog.length) : "--";
+      if (last) last.textContent = lastEconomicsRefresh ? lastEconomicsRefresh : "--";
+    }
+
+    function normaliseMeteoPayload(payload, station) {
+      const measurements = payload.measurements || payload.stationdata || payload || {};
+      const read = (...keys) => {
+        for (const key of keys) {
+          let value = measurements[key];
+          if (value === undefined || value === null) continue;
+          if (typeof value === "object") {
+            value = value.value ?? value.data ?? Object.values(value)[0];
+          }
+          const num = Number(value);
+          if (!Number.isNaN(num)) return num;
+        }
+        return null;
+      };
+
+      return {
+        station: {
+          id: station.code,
+          name: station.name,
+          latitude: station.lat,
+          longitude: station.lon,
+          altitude: station.altitude,
+        },
+        timestamp: payload.timestamp || measurements.time || new Date().toISOString(),
+        temperature: read("temperature", "tre200s0"),
+        relative_humidity: read("humidity", "ure200s0"),
+        wind_speed: read("windSpeed", "fu3010z0"),
+        wind_direction: read("windDirection", "dkl010z0"),
+        global_radiation: read("globalRadiation", "gre000z0"),
+        source: "meteoswiss",
+        raw: payload,
+      };
+    }
+
+    function buildSyntheticWeather(lat, lon, tz, date, station, error) {
+      const pos = computeSunPosition(date, lat, lon, tz);
+      const elev = Math.max(0, deg2rad(pos.elevationDeg));
+      const ghi = Math.max(0, 1000 * Math.sin(elev));
+      return {
+        station: {
+          id: station?.code || "synthetic",
+          name: station?.name || "Synthétique",
+          latitude: lat,
+          longitude: lon,
+        },
+        timestamp: date.toISOString(),
+        temperature: 20 - 10 * Math.cos((date.getHours() / 24) * 2 * Math.PI),
+        relative_humidity: 55,
+        wind_speed: 2,
+        wind_direction: null,
+        global_radiation: ghi,
+        source: error ? "synthetic-clear-sky" : "clear-sky",
+        error: error ? String(error) : undefined,
+      };
+    }
+
+    function formatNumber(v, digits = 1) {
+      if (!isFinite(v)) return "--";
+      return Number(v).toFixed(digits);
+    }
+
+    function updateStats(state) {
+      document.getElementById("statAzimuth").textContent = `${formatNumber(state.currentAzimuth, 1)}°`;
+      document.getElementById("statTilt").textContent = `${formatNumber(state.currentTilt, 1)}°`;
+      document.getElementById("statPoa").textContent = `${formatNumber(state.poaGlobal, 0)} W/m²`;
+      document.getElementById("statTime").textContent = state.timeLabel;
+    }
+
+    function updateResults(pos, irr) {
+      document.getElementById("sunAz").textContent = `${formatNumber(pos.azimuthDeg, 1)}°`;
+      document.getElementById("sunEl").textContent = `${formatNumber(pos.elevationDeg, 1)}°`;
+      document.getElementById("poaDir").textContent = `${formatNumber(irr.poaDirect, 0)} W/m²`;
+      document.getElementById("poaDiff").textContent = `${formatNumber(irr.poaDiffuse, 0)} W/m²`;
+      document.getElementById("poaGround").textContent = `${formatNumber(irr.poaGround, 0)} W/m²`;
+      document.getElementById("poaGlobal").textContent = `${formatNumber(irr.poaGlobal, 0)} W/m²`;
+    }
+
+    function updateNightWarning(isNight) {
+      const el = document.getElementById("nightWarning");
+      if (!el) return;
+      el.style.display = isNight ? "block" : "none";
+    }
+
+    function setValidationWarning(messages) {
+      const el = document.getElementById("validationWarning");
+      if (!el) return;
+      if (!messages.length) {
+        el.style.display = "none";
+        el.textContent = "";
+        return;
+      }
+      el.style.display = "block";
+      el.textContent = messages.join(" ");
+    }
+
+    function collectValidationWarnings() {
+      const warnings = [];
+      const num = (id) => Number(document.getElementById(id)?.value);
+
+      const lat = num("lat");
+      const lon = num("lon");
+      if (!Number.isFinite(lat) || lat < -90 || lat > 90) {
+        warnings.push("Latitude invalide (attendu -90 à 90).");
+      }
+      if (!Number.isFinite(lon) || lon < -180 || lon > 180) {
+        warnings.push("Longitude invalide (attendu -180 à 180).");
+      }
+
+      const tilt = num("tilt");
+      if (!Number.isFinite(tilt) || tilt < 0 || tilt > 90) {
+        warnings.push("Inclinaison invalide (0 à 90°).");
+      }
+      const az = num("azPanel");
+      if (!Number.isFinite(az) || az < 0 || az > 360) {
+        warnings.push("Azimut panneau invalide (0 à 360°).");
+      }
+
+      const area = num("area");
+      if (!Number.isFinite(area) || area <= 0) {
+        warnings.push("Surface totale invalide (doit être > 0).");
+      }
+
+      const shading = num("shadingFactor");
+      if (!Number.isFinite(shading) || shading < 0 || shading > 1) {
+        warnings.push("Ombres invalide (0 à 1).");
+      }
+      const soiling = num("soilingPercent");
+      if (!Number.isFinite(soiling) || soiling < 0 || soiling > 10) {
+        warnings.push("Encrassement invalide (0 à 10%).");
+      }
+      const inverter = num("inverterEff");
+      if (!Number.isFinite(inverter) || inverter < 0 || inverter > 100) {
+        warnings.push("Rendement onduleur invalide (0 à 100%).");
+      }
+      const mismatch = num("mismatchPercent");
+      if (!Number.isFinite(mismatch) || mismatch < 0 || mismatch > 5) {
+        warnings.push("Mismatch invalide (0 à 5%).");
+      }
+      const dcLoss = num("dcLossPercent");
+      if (!Number.isFinite(dcLoss) || dcLoss < 0 || dcLoss > 5) {
+        warnings.push("Pertes câbles DC invalide (0 à 5%).");
+      }
+      const acLoss = num("acLossPercent");
+      if (!Number.isFinite(acLoss) || acLoss < 0 || acLoss > 5) {
+        warnings.push("Pertes câbles AC invalide (0 à 5%).");
+      }
+      const tempCoeff = num("tempCoeff");
+      if (!Number.isFinite(tempCoeff) || tempCoeff > 0 || tempCoeff < -0.6) {
+        warnings.push("Coeff. température invalide (ex: -0.60 à 0).");
+      }
+      const noct = num("noct");
+      if (!Number.isFinite(noct) || noct < 35 || noct > 60) {
+        warnings.push("NOCT invalide (35 à 60°C).");
+      }
+      const refTemp = num("refTemp");
+      if (!Number.isFinite(refTemp) || refTemp < 20 || refTemp > 30) {
+        warnings.push("Température référence invalide (20 à 30°C).");
+      }
+      const variantEnabled = document.getElementById("variantEnabled")?.value === "yes";
+      if (variantEnabled) {
+        const vTilt = num("variantTilt");
+        const vAz = num("variantAzPanel");
+        if (!Number.isFinite(vTilt) || vTilt < 0 || vTilt > 90) {
+          warnings.push("Inclinaison variante invalide (0 à 90°).");
+        }
+        if (!Number.isFinite(vAz) || vAz < 0 || vAz > 360) {
+          warnings.push("Azimut variante invalide (0 à 360°).");
+        }
+      }
+
+      return warnings;
+    }
+
+    function renderChart(canvas, data) {
+      if (!canvas) return;
+      if (canvas.width !== canvas.clientWidth || canvas.height !== canvas.clientHeight) {
+        canvas.width = Math.max(1, canvas.clientWidth);
+        canvas.height = Math.max(1, canvas.clientHeight);
+      }
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      const theme = getComputedStyle(document.documentElement);
+      const colorElev = theme.getPropertyValue("--accent").trim() || "#4dd2c6";
+      const colorAz = theme.getPropertyValue("--accent-2").trim() || "#7b8cff";
+      const colorPoa = "#f6c177";
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const padding = { left: 50, right: 20, top: 20, bottom: 30 };
+      const w = canvas.width - padding.left - padding.right;
+      const h = canvas.height - padding.top - padding.bottom;
+
+      const maxY = Math.max(...data.elevation, ...data.azimuth, ...data.poa.map(v => v / 10), 1);
+      const minY = Math.min(...data.elevation, 0);
+      const spanY = maxY - minY || 1; // éviter division par zéro
+
+      // axes
+      ctx.strokeStyle = "rgba(255,255,255,0.1)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(padding.left, padding.top);
+      ctx.lineTo(padding.left, padding.top + h);
+      ctx.lineTo(padding.left + w, padding.top + h);
+      ctx.stroke();
+
+      const plotLine = (values, color, scale = 1) => {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        values.forEach((v, i) => {
+          const x = padding.left + (w * i) / Math.max(1, values.length - 1);
+          const y = padding.top + h - ((v / scale - minY) / spanY) * h;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+      };
+
+      plotLine(data.elevation, colorElev);
+      plotLine(data.azimuth, colorAz);
+      plotLine(data.poa.map(v => v / 10), colorPoa); // scaled for visibility
+    }
+
+    function renderSeriesChart(canvas, series, options = {}) {
+      if (!canvas) return;
+      if (canvas.width !== canvas.clientWidth || canvas.height !== canvas.clientHeight) {
+        canvas.width = Math.max(1, canvas.clientWidth);
+        canvas.height = Math.max(1, canvas.clientHeight);
+      }
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      const theme = getComputedStyle(document.documentElement);
+      const color = options.color || theme.getPropertyValue("--accent").trim() || "#4dd2c6";
+      const labels = options.labels || [];
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const padding = { left: 42, right: 18, top: 16, bottom: 28 };
+      const w = canvas.width - padding.left - padding.right;
+      const h = canvas.height - padding.top - padding.bottom;
+      const maxY = Math.max(...series, 1);
+      const minY = Math.min(...series, 0);
+      const spanY = maxY - minY || 1;
+
+      ctx.strokeStyle = "rgba(255,255,255,0.12)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(padding.left, padding.top);
+      ctx.lineTo(padding.left, padding.top + h);
+      ctx.lineTo(padding.left + w, padding.top + h);
+      ctx.stroke();
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      series.forEach((v, i) => {
+        const x = padding.left + (w * i) / Math.max(1, series.length - 1);
+        const y = padding.top + h - ((v - minY) / spanY) * h;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      if (labels.length) {
+        ctx.fillStyle = "rgba(255,255,255,0.65)";
+        ctx.font = "12px Sora, sans-serif";
+        const step = Math.max(1, Math.floor(labels.length / 6));
+        labels.forEach((label, i) => {
+          if (i % step !== 0 && i !== labels.length - 1) return;
+          const x = padding.left + (w * i) / Math.max(1, labels.length - 1);
+          ctx.fillText(label, x - 6, padding.top + h + 18);
+        });
+      }
+    }
+
+    function getInputs() {
+      const lat = parseFloat(document.getElementById("lat").value) || 0;
+      const lon = parseFloat(document.getElementById("lon").value) || 0;
+      const tz = parseFloat(document.getElementById("tz").value) || 0;
+      const tilt = parseFloat(document.getElementById("tilt").value) || 0;
+      const azPanel = parseFloat(document.getElementById("azPanel").value) || 0;
+      const albedo = Math.min(1, Math.max(0, parseFloat(document.getElementById("albedo").value) || 0.2));
+      const area = Math.max(0.1, parseFloat(document.getElementById("area").value) || 0);
+      const weatherSource = document.getElementById("weatherSource").value || "clear_sky";
+      const shadingFactor = Math.min(1, Math.max(0, parseFloat(document.getElementById("shadingFactor").value) || 0));
+      const soilingPercent = Math.min(100, Math.max(0, parseFloat(document.getElementById("soilingPercent").value) || 0));
+      const modulePower = Math.max(0, parseFloat(document.getElementById("modulePower").value) || 0);
+      const moduleCount = Math.max(0, parseFloat(document.getElementById("moduleCount").value) || 0);
+      const inverterEff = Math.min(100, Math.max(0, parseFloat(document.getElementById("inverterEff").value) || 0));
+      const mismatchPercent = Math.min(100, Math.max(0, parseFloat(document.getElementById("mismatchPercent").value) || 0));
+      const dcLossPercent = Math.min(100, Math.max(0, parseFloat(document.getElementById("dcLossPercent").value) || 0));
+      const acLossPercent = Math.min(100, Math.max(0, parseFloat(document.getElementById("acLossPercent").value) || 0));
+      const tempCoeff = Number(document.getElementById("tempCoeff").value) || 0;
+      const noct = Math.max(0, parseFloat(document.getElementById("noct").value) || 0);
+      const refTemp = Number(document.getElementById("refTemp").value) || 25;
+      const variantEnabled = document.getElementById("variantEnabled")?.value === "yes";
+      const variantTilt = parseFloat(document.getElementById("variantTilt")?.value) || 0;
+      const variantAzPanel = parseFloat(document.getElementById("variantAzPanel")?.value) || 0;
+      const scenarioType = document.getElementById("scenarioType")?.value || "standard";
+      const studyHorizon = document.getElementById("studyHorizon")?.value || "year";
+
+      const dateInput = document.getElementById("date").value;
+      const hourInput = document.getElementById("timeHour").value;
+      const minuteInput = document.getElementById("timeMinute").value;
+      const timeInput = `${hourInput}:${minuteInput}`;
+      let date = (dateInput && hourInput && minuteInput) ? new Date(`${dateInput}T${timeInput}`) : new Date();
+      if (isNaN(date.getTime())) date = new Date(); // fallback si date invalide
+      return {
+        lat,
+        lon,
+        tz,
+        tilt,
+        azPanel,
+        albedo,
+        area,
+        date,
+        weatherSource,
+        shadingFactor,
+        soilingPercent,
+        modulePower,
+        moduleCount,
+        inverterEff,
+        mismatchPercent,
+        dcLossPercent,
+        acLossPercent,
+        tempCoeff,
+        noct,
+        refTemp,
+        variantEnabled,
+        variantTilt,
+        variantAzPanel,
+        scenarioType,
+        studyHorizon,
+      };
+    }
+
+    function simulate(type = "now") {
+      const canvas = document.getElementById("chart");
+      setValidationWarning(collectValidationWarnings());
+      const { lat, lon, tz, tilt, azPanel, albedo, date } = getInputs();
+      const nowLabel = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+      try {
+        if (type === "now") {
+          const pos = computeSunPosition(date, lat, lon, tz);
+          const irr = computeIrradiance(pos.elevationDeg, pos.azimuthDeg, tilt, azPanel, albedo);
+          updateNightWarning(pos.elevationDeg <= 0);
+
+          updateResults(pos, irr);
+          updateStats({
+            currentAzimuth: pos.azimuthDeg,
+            currentTilt: Math.max(0, 90 - pos.elevationDeg),
+            poaGlobal: irr.poaGlobal,
+            timeLabel: nowLabel,
+          });
+          renderChart(canvas, {
+            elevation: [Math.max(0, pos.elevationDeg)],
+            azimuth: [pos.azimuthDeg],
+            poa: [irr.poaGlobal],
+          });
+        } else {
+          const steps = [];
+          for (let h = 0; h <= 23; h += 1) {
+            const d = new Date(date);
+            d.setHours(h, 0, 0, 0);
+            const pos = computeSunPosition(d, lat, lon, tz);
+            const irr = computeIrradiance(pos.elevationDeg, pos.azimuthDeg, tilt, azPanel, albedo);
+            steps.push({ pos, irr });
+          }
+          const elevation = steps.map(s => Math.max(0, s.pos.elevationDeg));
+          const azimuth = steps.map(s => s.pos.azimuthDeg);
+          const poa = steps.map(s => s.irr.poaGlobal);
+          const anyDaylight = steps.some(s => s.pos.elevationDeg > 0);
+          updateNightWarning(!anyDaylight);
+
+          const last = steps[steps.length - 1];
+          updateResults(last.pos, last.irr);
+          updateStats({
+            currentAzimuth: last.pos.azimuthDeg,
+            currentTilt: Math.max(0, 90 - last.pos.elevationDeg),
+            poaGlobal: last.irr.poaGlobal,
+            timeLabel: "Simulation 24h",
+          });
+          renderChart(canvas, { elevation, azimuth, poa });
+        }
+      } catch (err) {
+        console.error("Simulation error", err);
+        alert("Erreur dans la simulation. Vérifie les valeurs ou la date.");
+      }
+    }
+
+    function estimateAmbientTemp(baseTemp, date) {
+      if (!isFinite(baseTemp)) return 20;
+      const hour = date.getHours() + date.getMinutes() / 60;
+      const swing = 6;
+      return baseTemp + swing * Math.sin(((hour - 6) / 24) * 2 * Math.PI);
+    }
+
+    function computeCellTemp(ambient, poa, noct) {
+      if (!isFinite(noct) || noct <= 0) return ambient;
+      return ambient + ((noct - 20) / 800) * poa;
+    }
+
+    function computeTempFactor(cellTemp, tempCoeff, refTemp) {
+      if (!isFinite(tempCoeff)) return 1;
+      const delta = cellTemp - (isFinite(refTemp) ? refTemp : 25);
+      const factor = 1 + (tempCoeff / 100) * delta;
+      return Math.max(0.5, Math.min(1.2, factor));
+    }
+
+    function integrateEnergyRangeDetailed(lat, lon, tz, tilt, azPanel, albedo, area, start, end, stepHours = 1, scaleFactor = 1, tempModel = null) {
+      let totalWh = 0;
+      let totalTempWh = 0;
+      const stepMs = stepHours * 3600000;
+      let cursor = new Date(start.getTime());
+
+      while (cursor < end) {
+        const pos = computeSunPosition(cursor, lat, lon, tz);
+        if (pos.elevationDeg > 0) {
+          const irr = computeIrradiance(pos.elevationDeg, pos.azimuthDeg, tilt, azPanel, albedo);
+          const poa = Math.max(0, irr.poaGlobal) * scaleFactor;
+          const power = poa * area;
+          totalWh += power * stepHours;
+          if (tempModel) {
+            const ambient = estimateAmbientTemp(tempModel.baseTemp, cursor);
+            const cellTemp = computeCellTemp(ambient, poa, tempModel.noct);
+            const tempFactor = computeTempFactor(cellTemp, tempModel.tempCoeff, tempModel.refTemp);
+            totalTempWh += power * tempFactor * stepHours;
+          } else {
+            totalTempWh += power * stepHours;
+          }
+        }
+        cursor = new Date(cursor.getTime() + stepMs);
+      }
+
+      return { raw: totalWh / 1000, tempAdjusted: totalTempWh / 1000 };
+    }
+
+    function buildDailyProfile(lat, lon, tz, tilt, azPanel, albedo, area, date, scaleFactor, tempModel) {
+      const hours = [];
+      const power = [];
+      for (let h = 0; h <= 23; h += 1) {
+        const d = new Date(date);
+        d.setHours(h, 0, 0, 0);
+        const pos = computeSunPosition(d, lat, lon, tz);
+        const irr = computeIrradiance(pos.elevationDeg, pos.azimuthDeg, tilt, azPanel, albedo);
+        const poa = Math.max(0, irr.poaGlobal) * scaleFactor;
+        const ambient = tempModel ? estimateAmbientTemp(tempModel.baseTemp, d) : 20;
+        const cellTemp = tempModel ? computeCellTemp(ambient, poa, tempModel.noct) : ambient;
+        const tempFactor = tempModel ? computeTempFactor(cellTemp, tempModel.tempCoeff, tempModel.refTemp) : 1;
+        const p = poa * area * tempFactor;
+        hours.push(String(h).padStart(2, "0"));
+        power.push(p);
+      }
+      return { hours, power };
+    }
+
+    function buildMonthlyProfile(lat, lon, tz, tilt, azPanel, albedo, area, year, scaleFactor, tempModel, lossFactor) {
+      const months = [];
+      const energy = [];
+      for (let m = 0; m < 12; m += 1) {
+        const monthStart = new Date(year, m, 1);
+        const monthEnd = new Date(year, m + 1, 1);
+        const monthly = integrateEnergyRangeDetailed(lat, lon, tz, tilt, azPanel, albedo, area, monthStart, monthEnd, 1, scaleFactor, tempModel);
+        const net = monthly.tempAdjusted * lossFactor;
+        months.push(monthStart.toLocaleDateString("fr-CH", { month: "short" }));
+        energy.push(net);
+      }
+      return { months, energy };
+    }
+
+    function deriveIrradianceScale(weatherData, lat, lon, tz, fallbackDate) {
+      if (!weatherData || weatherData.global_radiation === undefined || weatherData.global_radiation === null) {
+        return 1;
+      }
+
+      let ts = weatherData.timestamp ? new Date(weatherData.timestamp) : fallbackDate;
+      if (Number.isNaN(ts?.getTime())) ts = fallbackDate;
+      const pos = computeSunPosition(ts, lat, lon, tz);
+      const synthetic = Math.max(0, 1000 * Math.sin(deg2rad(Math.max(0, pos.elevationDeg))));
+      if (synthetic <= 1e-3) return 1;
+      const scale = Number(weatherData.global_radiation) / synthetic;
+      return Math.max(0.2, Math.min(1.5, scale));
+    }
+
+    function buildLosses(soilingPercent, shadingFactor, inverterEff, mismatchPercent, dcLossPercent, acLossPercent, tempLossFraction) {
+      const losses = [
+        { name: "Température modules", fraction: Math.min(1, Math.max(0, tempLossFraction || 0)) },
+        { name: "Encrassement (soiling)", fraction: Math.min(1, Math.max(0, (soilingPercent || 0) / 100)) },
+        { name: "Ombres", fraction: Math.min(1, Math.max(0, shadingFactor || 0)) },
+        { name: "Mismatch modules", fraction: Math.min(1, Math.max(0, (mismatchPercent || 0) / 100)) },
+        { name: "Pertes câbles DC", fraction: Math.min(1, Math.max(0, (dcLossPercent || 0) / 100)) },
+        { name: "Pertes câbles AC", fraction: Math.min(1, Math.max(0, (acLossPercent || 0) / 100)) },
+        { name: "Rendement onduleur", fraction: 1 - Math.min(1, Math.max(0, (inverterEff || 0) / 100)) },
+        ...baseLosses,
+      ];
+      return losses.filter(loss => loss.fraction > 0);
+    }
+
+    function computeLossFactor(losses) {
+      return losses.reduce((acc, loss) => acc * (1 - Math.max(0, loss.fraction || 0)), 1);
+    }
+
+    function computeKeyIndicators(annualNet, annualRaw, area, kWp) {
+      const specificYield = kWp > 0 ? annualNet / kWp : null;
+      const hPoa = area > 0 ? annualRaw / area : null;
+      const pr = (kWp > 0 && hPoa) ? (annualNet / (hPoa * kWp)) * 100 : null;
+      const capacity = kWp > 0 ? (annualNet / (kWp * 8760)) * 100 : null;
+      const co2 = annualNet > 0 ? (annualNet / 1000) * CO2_FACTOR_T_PER_MWH : null;
+      return { specificYield, pr, capacity, co2 };
+    }
+
+    function updateKeyIndicators(annualNet, annualRaw, area, kWp) {
+      const indicators = computeKeyIndicators(annualNet, annualRaw, area, kWp);
+      document.getElementById("specificYield").textContent = indicators.specificYield === null ? "-- kWh/kWp" : `${formatNumber(indicators.specificYield, 1)} kWh/kWp`;
+      document.getElementById("performanceRatio").textContent = indicators.pr === null ? "-- %" : `${formatNumber(indicators.pr, 1)} %`;
+      document.getElementById("capacityFactor").textContent = indicators.capacity === null ? "-- %" : `${formatNumber(indicators.capacity, 1)} %`;
+      document.getElementById("co2Avoided").textContent = indicators.co2 === null ? "-- t/an" : `${formatNumber(indicators.co2, 2)} t/an`;
+      return indicators;
+    }
+
+    function buildLossBreakdown(energy, losses) {
+      const rows = [];
+      let remaining = energy;
+
+      losses.forEach(loss => {
+        const pct = Math.max(0, loss.fraction || 0);
+        const lossValue = remaining * pct;
+        remaining = Math.max(0, remaining - lossValue);
+        rows.push({
+          name: loss.name,
+          percent: pct * 100,
+          lossKwh: lossValue,
+          remaining,
+        });
+      });
+
+      return { rows, final: remaining };
+    }
+
+    function setEnergyResult(id, data) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = `${formatNumber(data.net, 1)} kWh (brut ${formatNumber(data.raw, 1)})`;
+    }
+
+    function setEnergyPlaceholder(id, label = "--") {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = label;
+    }
+
+    function updateLossTable(rows, finalEnergy, summaryLabel = "Énergie nette annuelle") {
+      const tbody = document.getElementById("lossTableBody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      if (!rows.length) {
+        const empty = document.createElement("tr");
+        const cell = document.createElement("td");
+        cell.colSpan = 4;
+        cell.textContent = "Aucune perte renseignée.";
+        empty.appendChild(cell);
+        tbody.appendChild(empty);
+      } else {
+        rows.forEach(row => {
+          const tr = document.createElement("tr");
+          [
+            row.name,
+            `${formatNumber(row.percent, 1)}`,
+            `${formatNumber(row.lossKwh, 2)}`,
+            `${formatNumber(row.remaining, 2)}`,
+          ].forEach(value => {
+            const td = document.createElement("td");
+            td.textContent = value;
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        });
+      }
+
+      const totalRow = document.createElement("tr");
+      const label = document.createElement("td");
+      label.textContent = summaryLabel;
+      totalRow.appendChild(label);
+      ["-", "-", `${formatNumber(finalEnergy, 2)}`].forEach(value => {
+        const td = document.createElement("td");
+        td.textContent = value;
+        totalRow.appendChild(td);
+      });
+      tbody.appendChild(totalRow);
+    }
+
+    function scenarioScaleFactor(type) {
+      if (type === "optimistic") return 1.08;
+      if (type === "pessimistic") return 0.9;
+      return 1.0;
+    }
+
+    async function fetchMeteoSwissData(lat, lon) {
+      const url = new URL(METEOSWISS_ENDPOINT, window.location.origin);
+      url.searchParams.set("lat", lat);
+      url.searchParams.set("lon", lon);
+      const response = await fetch(url, { headers: { "Accept": "application/json" } });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      return response.json();
+    }
+
+    async function updateWeatherData(source, lat, lon, tz, date) {
+      if (source !== "meteoswiss") {
+        cachedWeather = null;
+        setWeatherStatus("Météo : ciel clair (offline)", "info");
+        setWeatherDetails(null);
+        return null;
+      }
+
+      setWeatherStatus("Connexion à MeteoSwiss…", "pending");
+      try {
+        const data = await fetchMeteoSwissData(lat, lon);
+        cachedWeather = data;
+        const stationName = data.station?.name || "station inconnue";
+        const timestamp = data.timestamp?.replace("T", " ") || "--";
+        setWeatherStatus(`MeteoSwiss – ${stationName} (${timestamp})`, "success");
+        setWeatherDetails(data);
+        return data;
+      } catch (error) {
+        console.warn("MeteoSwiss error", error);
+        const fallback = buildSyntheticWeather(lat, lon, tz, date, null, error);
+        cachedWeather = fallback;
+        setWeatherStatus(`MeteoSwiss indisponible (${error.message})`, "error");
+        setWeatherDetails(fallback);
+        return fallback;
+      }
+    }
+
+    let lastSimulation = null;
+    let lastFinance = null;
+    let lastEconomicsRefresh = null;
+    const PREFS_STORAGE_KEY = "helios_prefs";
+
+    async function simulateEnergyProduction() {
+      setValidationWarning(collectValidationWarnings());
+      const {
+        lat,
+        lon,
+        tz,
+        tilt,
+        azPanel,
+        albedo,
+        area,
+        date,
+        weatherSource,
+        shadingFactor,
+        modulePower,
+        moduleCount,
+        inverterEff,
+        mismatchPercent,
+        dcLossPercent,
+        acLossPercent,
+        tempCoeff,
+        noct,
+        refTemp,
+        variantEnabled,
+        variantTilt,
+        variantAzPanel,
+        scenarioType,
+        studyHorizon,
+        soilingPercent,
+      } = getInputs();
+      const areaSafe = Math.max(0.1, area);
+
+      const weatherData = await updateWeatherData(weatherSource, lat, lon, tz, date);
+      const scenarioScale = scenarioScaleFactor(scenarioType);
+      const scaleFactor = deriveIrradianceScale(weatherData, lat, lon, tz, date) * scenarioScale;
+
+      const dayStart = new Date(date);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(dayStart.getTime() + 24 * 3600000);
+
+      const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+      const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+
+      const yearStart = new Date(date.getFullYear(), 0, 1);
+      const yearEnd = new Date(date.getFullYear() + 1, 0, 1);
+
+      const tempModel = {
+        baseTemp: weatherData?.temperature ?? 20,
+        tempCoeff,
+        noct,
+        refTemp,
+      };
+
+      const daily = integrateEnergyRangeDetailed(lat, lon, tz, tilt, azPanel, albedo, areaSafe, dayStart, dayEnd, 1, scaleFactor, tempModel);
+      const monthly = integrateEnergyRangeDetailed(lat, lon, tz, tilt, azPanel, albedo, areaSafe, monthStart, monthEnd, 1, scaleFactor, tempModel);
+      const annual = integrateEnergyRangeDetailed(lat, lon, tz, tilt, azPanel, albedo, areaSafe, yearStart, yearEnd, 1, scaleFactor, tempModel);
+
+      const tempLossFraction = (() => {
+        if (studyHorizon === "day") {
+          return daily.raw > 0 ? Math.max(0, (daily.raw - daily.tempAdjusted) / daily.raw) : 0;
+        }
+        if (studyHorizon === "month") {
+          return monthly.raw > 0 ? Math.max(0, (monthly.raw - monthly.tempAdjusted) / monthly.raw) : 0;
+        }
+        return annual.raw > 0 ? Math.max(0, (annual.raw - annual.tempAdjusted) / annual.raw) : 0;
+      })();
+      const losses = buildLosses(soilingPercent, shadingFactor, inverterEff, mismatchPercent, dcLossPercent, acLossPercent, tempLossFraction);
+      const factor = computeLossFactor(losses);
+      const otherLosses = buildLosses(soilingPercent, shadingFactor, inverterEff, mismatchPercent, dcLossPercent, acLossPercent, 0);
+      const otherFactor = computeLossFactor(otherLosses);
+      const energies = {
+        daily: { raw: daily.raw, net: daily.tempAdjusted * otherFactor },
+        monthly: { raw: monthly.raw, net: monthly.tempAdjusted * otherFactor },
+        annual: { raw: annual.raw, net: annual.tempAdjusted * otherFactor },
+      };
+
+      const breakdownBase = (() => {
+        if (studyHorizon === "day") return daily.raw;
+        if (studyHorizon === "month") return monthly.raw;
+        return annual.raw;
+      })();
+      const breakdownLabel = (() => {
+        if (studyHorizon === "day") return "Énergie nette journalière";
+        if (studyHorizon === "month") return "Énergie nette mensuelle";
+        return "Énergie nette annuelle";
+      })();
+      const breakdown = buildLossBreakdown(breakdownBase, losses);
+      const kWp = (modulePower * moduleCount) / 1000;
+
+      if (studyHorizon === "day") {
+        setEnergyResult("energyDay", energies.daily);
+        setEnergyPlaceholder("energyMonth");
+        setEnergyPlaceholder("energyYear");
+      } else if (studyHorizon === "month") {
+        setEnergyPlaceholder("energyDay");
+        setEnergyResult("energyMonth", energies.monthly);
+        setEnergyPlaceholder("energyYear");
+      } else {
+        setEnergyResult("energyDay", energies.daily);
+        setEnergyResult("energyMonth", energies.monthly);
+        setEnergyResult("energyYear", energies.annual);
+      }
+      document.getElementById("lossFactor").textContent = `Facteur global après pertes : ${formatNumber(factor * 100, 1)} %`;
+      updateLossTable(breakdown.rows, breakdown.final, breakdownLabel);
+      const indicators = updateKeyIndicators(energies.annual.net, energies.annual.raw, areaSafe, kWp);
+
+      const dailyProfile = buildDailyProfile(lat, lon, tz, tilt, azPanel, albedo, areaSafe, date, scaleFactor, tempModel);
+      const monthlyProfile = buildMonthlyProfile(lat, lon, tz, tilt, azPanel, albedo, areaSafe, date.getFullYear(), scaleFactor, tempModel, otherFactor);
+      renderSeriesChart(document.getElementById("dailyChart"), dailyProfile.power, { labels: dailyProfile.hours, color: "#7b8cff" });
+      renderSeriesChart(document.getElementById("monthlyChart"), monthlyProfile.energy, { labels: monthlyProfile.months, color: "#f6c177" });
+
+      let variantResult = null;
+      if (variantEnabled) {
+        const variantAnnual = integrateEnergyRangeDetailed(
+          lat,
+          lon,
+          tz,
+          variantTilt,
+          variantAzPanel,
+          albedo,
+          areaSafe,
+          yearStart,
+          yearEnd,
+          1,
+          scaleFactor,
+          tempModel
+        );
+        const variantNet = variantAnnual.tempAdjusted * otherFactor;
+        const delta = energies.annual.net > 0 ? ((variantNet - energies.annual.net) / energies.annual.net) * 100 : 0;
+        document.getElementById("variantAnnual").textContent = `${formatNumber(variantNet, 1)} kWh/an`;
+        document.getElementById("variantDelta").textContent = `${formatNumber(delta, 1)} %`;
+        variantResult = { net: variantNet, deltaPercent: delta };
+      } else {
+        document.getElementById("variantAnnual").textContent = "--";
+        document.getElementById("variantDelta").textContent = "--";
+      }
+
+      lastSimulation = {
+        timestamp: new Date().toISOString(),
+        inputs: {
+          lat,
+          lon,
+          tz,
+          tilt,
+          azPanel,
+          albedo,
+          area: areaSafe,
+          scenarioType,
+          studyHorizon,
+          modulePower,
+          moduleCount,
+          kWp,
+          shadingFactor,
+          soilingPercent,
+          inverterEff,
+          mismatchPercent,
+          dcLossPercent,
+          acLossPercent,
+          tempCoeff,
+          noct,
+          refTemp,
+          variantEnabled,
+          variantTilt,
+          variantAzPanel,
+        },
+        energies,
+        factor,
+        losses,
+        breakdown: breakdown.rows,
+        breakdownFinal: breakdown.final,
+        dailyProfile,
+        monthlyProfile,
+        variantResult,
+        indicators,
+      };
+      updateFinanceSummary();
+      updateAlertStatus();
+    }
+
+    function downloadCsv(filename, rows) {
+      const csvBody = rows.map(row => row.map(value => {
+        const text = value === null || value === undefined ? "" : String(value);
+        return `"${text.replace(/"/g, "\"\"")}"`;
+      }).join(";")).join("\r\n");
+      const csv = `\ufeff${csvBody}`;
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    function buildFinanceReportHtml() {
+      if (!lastFinance) return "";
+      const f = lastFinance;
+      const lines = [
+        `<h1>Rapport financier</h1>`,
+        `<p><strong>Horodatage :</strong> ${f.timestamp}</p>`,
+        `<h2>Hypothèses</h2>`,
+        `<p>Puissance installée: ${f.inputs.installedPower} kWc — CAPEX: ${f.inputs.capexPerKwp} CHF/kWc</p>`,
+        `<p>Raccordement: ${f.inputs.gridConnection} CHF — Ingénierie: ${f.inputs.engineering} CHF</p>`,
+        `<p>Investissement de départ: ${f.inputs.initialInvestment || "auto"} — Subvention: ${(f.inputs.subsidyPercent * 100).toFixed(1)} % + ${f.inputs.subsidyFixed} CHF</p>`,
+        `<p>Autoconsommation: ${(f.inputs.selfConsumption * 100).toFixed(1)} % — Tarif rachat: ${f.inputs.feedInTariff} CHF/kWh</p>`,
+        `<p>Prix évité: ${f.inputs.electricityPrice} CHF/kWh — Production annuelle: ${f.inputs.annualProduction ?? "n/a"} kWh</p>`,
+        `<h2>Résultats</h2>`,
+        `<p>Investissement net: ${formatCurrency(f.computed.netCapex)}</p>`,
+        `<p>Revenu annuel: ${formatCurrency(f.computed.revenue, "CHF/an")}</p>`,
+        `<p>Cash-flow net: ${formatCurrency(f.computed.netCashflow, "CHF/an")}</p>`,
+      ];
+
+      return `
+        <html>
+          <head>
+            <meta charset="utf-8" />
+            <title>Rapport financier</title>
+            <style>
+              body { font-family: "Work Sans", Arial, sans-serif; margin: 32px; color: #111827; }
+              h1 { font-size: 24px; margin-bottom: 8px; }
+              h2 { font-size: 16px; margin-top: 24px; }
+              p { font-size: 13px; }
+            </style>
+          </head>
+          <body>${lines.join("")}</body>
+        </html>
+      `;
+    }
+
+    function exportFinancePdf() {
+      updateFinanceSummary();
+      if (!lastFinance) {
+        alert("Renseignez les hypothèses financières avant d'exporter.");
+        return;
+      }
+      const win = window.open("", "_blank");
+      if (!win) return;
+      win.document.write(buildFinanceReportHtml());
+      win.document.close();
+      win.focus();
+      setTimeout(() => win.print(), 300);
+    }
+
+    function exportFinanceCsv() {
+      updateFinanceSummary();
+      if (!lastFinance) {
+        alert("Renseignez les hypothèses financières avant d'exporter.");
+        return;
+      }
+      const f = lastFinance;
+      const rows = [
+        ["HELIOS - Finances"],
+        ["Horodatage", f.timestamp],
+        ["Investissement net (CHF)", f.computed.netCapex],
+        ["Revenu annuel (CHF)", f.computed.revenue],
+        ["Cash-flow net (CHF)", f.computed.netCashflow],
+        ["CAPEX (CHF/kWc)", f.inputs.capexPerKwp],
+        ["Puissance installée (kWc)", f.inputs.installedPower],
+        ["Raccordement (CHF)", f.inputs.gridConnection],
+        ["Ingénierie (CHF)", f.inputs.engineering],
+        ["Investissement de départ (CHF)", f.inputs.initialInvestment],
+        ["Subvention (%)", f.inputs.subsidyPercent * 100],
+        ["Subvention fixe (CHF)", f.inputs.subsidyFixed],
+        ["Autoconsommation (%)", f.inputs.selfConsumption * 100],
+        ["Tarif de rachat (CHF/kWh)", f.inputs.feedInTariff],
+        ["Prix évité (CHF/kWh)", f.inputs.electricityPrice],
+        ["Production annuelle (kWh)", f.inputs.annualProduction],
+        ["OPEX fixe (CHF/an)", f.inputs.opexFixed],
+        ["OPEX (%/an)", f.inputs.opexPercent * 100],
+        ["Assurance (CHF/an)", f.inputs.insurance],
+        ["Remplacement onduleur (CHF)", f.inputs.inverterReplacement],
+      ];
+      downloadCsv("helios-finances.csv", rows);
+    }
+
+    function getReportSelection() {
+      return {
+        format: document.getElementById("reportFormat")?.value || "pdf",
+        includeSimulation: document.getElementById("reportIncludeSimulation")?.checked,
+        includeSizing: document.getElementById("reportIncludeSizing")?.checked,
+        includeFinance: document.getElementById("reportIncludeFinance")?.checked,
+        includeParams: document.getElementById("reportIncludeParams")?.checked,
+        includeGraphs: document.getElementById("reportIncludeGraphs")?.checked,
+      };
+    }
+
+    function buildUnifiedReportHtml(options) {
+      const lines = [
+        `<h1>Rapport HELIOS</h1>`,
+        `<p><strong>Horodatage :</strong> ${new Date().toISOString()}</p>`,
+      ];
+
+      if (options.includeSimulation) {
+        if (!lastSimulation) {
+          lines.push(`<h2>Simulation</h2><p>Aucune simulation disponible.</p>`);
+        } else {
+          lines.push(`<h2>Simulation</h2>`);
+          lines.push(`<p>Annuel brut: ${formatNumber(lastSimulation.energies.annual.raw, 1)} kWh — Annuel net: ${formatNumber(lastSimulation.energies.annual.net, 1)} kWh</p>`);
+          lines.push(`<p>PR: ${formatNumber(lastSimulation.indicators.pr ?? 0, 1)} % — Spécifique: ${formatNumber(lastSimulation.indicators.specificYield ?? 0, 1)} kWh/kWp</p>`);
+          if (lastSimulation.breakdown?.length) {
+            lines.push(`<h3>Pertes</h3>`);
+            lines.push(`<table><thead><tr><th>Poste</th><th>%</th><th>kWh</th><th>Reste</th></tr></thead><tbody>`);
+            lines.push(...lastSimulation.breakdown.map(row => `<tr><td>${row.name}</td><td>${formatNumber(row.percent, 1)}</td><td>${formatNumber(row.lossKwh, 2)}</td><td>${formatNumber(row.remaining, 2)}</td></tr>`));
+            lines.push(`</tbody></table>`);
+          }
+        }
+      }
+
+      if (options.includeSizing) {
+        lines.push(`<h2>Dimensionnement</h2>`);
+        lines.push(`<p>Puissance cible: ${document.getElementById("sizingTargetPower")?.value || "--"} kWc</p>`);
+        lines.push(`<p>Surface dispo: ${document.getElementById("sizingAvailableArea")?.value || "--"} m²</p>`);
+        lines.push(`<p>Module: ${document.getElementById("sizingPanelName")?.textContent || "--"}</p>`);
+        lines.push(`<p>Modules: ${document.getElementById("sizingPanelCount")?.textContent || "--"} — Surface estimée: ${document.getElementById("sizingTotalArea")?.textContent || "--"}</p>`);
+        lines.push(`<p>Coût estimé: ${document.getElementById("sizingTotalCost")?.textContent || "--"} — Compatibilité: ${document.getElementById("sizingFitStatus")?.textContent || "--"}</p>`);
+      }
+
+      if (options.includeFinance) {
+        updateFinanceSummary();
+        if (!lastFinance) {
+          lines.push(`<h2>Finances</h2><p>Aucune donnée financière.</p>`);
+        } else {
+          lines.push(`<h2>Finances</h2>`);
+          lines.push(`<p>Investissement net: ${formatCurrency(lastFinance.computed.netCapex)}</p>`);
+          lines.push(`<p>Revenu annuel: ${formatCurrency(lastFinance.computed.revenue, "CHF/an")} — Cash-flow net: ${formatCurrency(lastFinance.computed.netCashflow, "CHF/an")}</p>`);
+          lines.push(`<p>OPEX annuel: ${formatCurrency(lastFinance.computed.annualOpex, "CHF/an")}</p>`);
+        }
+      }
+
+      if (options.includeParams) {
+        const prefs = readPrefInputs();
+        lines.push(`<h2>Paramètres</h2>`);
+        lines.push(`<pre>${JSON.stringify(prefs, null, 2)}</pre>`);
+      }
+
+      if (options.includeGraphs) {
+        const charts = [
+          { id: "chart", label: "Courbes soleil" },
+          { id: "dailyChart", label: "Profil journalier" },
+          { id: "monthlyChart", label: "Profil mensuel" },
+        ];
+        const imgs = charts.map(({ id, label }) => {
+          const canvas = document.getElementById(id);
+          if (!canvas) return null;
+          return { label, data: canvas.toDataURL("image/png") };
+        }).filter(Boolean);
+        if (imgs.length) {
+          lines.push(`<h2>Graphiques</h2>`);
+          imgs.forEach(img => {
+            lines.push(`<h3>${img.label}</h3><img src="${img.data}" alt="${img.label}" style="max-width:100%;"/>`);
+          });
+        }
+      }
+
+      return `
+        <html>
+          <head>
+            <meta charset="utf-8" />
+            <title>Rapport HELIOS</title>
+            <style>
+              body { font-family: "Work Sans", Arial, sans-serif; margin: 32px; color: #111827; }
+              h1 { font-size: 24px; margin-bottom: 8px; }
+              h2 { font-size: 16px; margin-top: 24px; }
+              p, pre { font-size: 13px; }
+              pre { background: #f9fafb; padding: 10px; border-radius: 6px; }
+              table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; }
+              th, td { border: 1px solid #e5e7eb; padding: 6px 8px; text-align: left; }
+              th { background: #f9fafb; }
+            </style>
+          </head>
+          <body>${lines.join("")}</body>
+        </html>
+      `;
+    }
+
+    function exportUnifiedReport(options) {
+      const selections = options || getReportSelection();
+      if (selections.format === "csv") {
+        const rows = [
+          ["HELIOS - Rapport"],
+          ["Horodatage", new Date().toISOString()],
+        ];
+        if (selections.includeSimulation) {
+          rows.push(["Simulation"]);
+          if (lastSimulation) {
+            rows.push(["Annuel brut (kWh)", lastSimulation.energies.annual.raw]);
+            rows.push(["Annuel net (kWh)", lastSimulation.energies.annual.net]);
+            rows.push(["PR (%)", lastSimulation.indicators.pr]);
+            rows.push(["Spécifique (kWh/kWp)", lastSimulation.indicators.specificYield]);
+          } else {
+            rows.push(["Aucune simulation", ""]);
+          }
+        }
+        if (selections.includeSizing) {
+          rows.push(["Dimensionnement"]);
+          rows.push(["Puissance cible (kWc)", document.getElementById("sizingTargetPower")?.value || ""]);
+          rows.push(["Surface dispo (m2)", document.getElementById("sizingAvailableArea")?.value || ""]);
+          rows.push(["Module", document.getElementById("sizingPanelName")?.textContent || ""]);
+          rows.push(["Modules", document.getElementById("sizingPanelCount")?.textContent || ""]);
+          rows.push(["Surface estimée", document.getElementById("sizingTotalArea")?.textContent || ""]);
+          rows.push(["Coût estimé", document.getElementById("sizingTotalCost")?.textContent || ""]);
+          rows.push(["Compatibilité", document.getElementById("sizingFitStatus")?.textContent || ""]);
+        }
+        if (selections.includeFinance) {
+          updateFinanceSummary();
+          rows.push(["Finances"]);
+          if (lastFinance) {
+            rows.push(["Investissement net (CHF)", lastFinance.computed.netCapex]);
+            rows.push(["Cash-flow net (CHF/an)", lastFinance.computed.netCashflow]);
+            rows.push(["Revenu annuel (CHF/an)", lastFinance.computed.revenue]);
+            rows.push(["OPEX annuel (CHF/an)", lastFinance.computed.annualOpex]);
+          } else {
+            rows.push(["Aucune finance", ""]);
+          }
+        }
+        if (selections.includeParams) {
+          rows.push(["Paramètres"]);
+          const prefs = readPrefInputs();
+          Object.entries(prefs).forEach(([k, v]) => rows.push([k, v]));
+        }
+        downloadCsv("helios-rapport.csv", rows);
+        return;
+      }
+
+      const win = window.open("", "_blank");
+      if (!win) return;
+      win.document.write(buildUnifiedReportHtml(selections));
+      win.document.close();
+      win.focus();
+      setTimeout(() => win.print(), 300);
+    }
+
+    function exportSimulationCsv() {
+      if (!lastSimulation) {
+        alert("Veuillez lancer une simulation avant d'exporter.");
+        return;
+      }
+
+      const { inputs, energies, factor, losses, breakdown, breakdownFinal, indicators } = lastSimulation;
+      const rows = [
+        ["HELIOS - Simulation de production"],
+        ["Horodatage", lastSimulation.timestamp],
+        ["Latitude", inputs.lat, "Longitude", inputs.lon],
+        ["Inclinaison", inputs.tilt, "Azimut panneau", inputs.azPanel],
+        ["Surface (m2)", inputs.area, "kWp", inputs.kWp],
+        ["Scénario", inputs.scenarioType, "Horizon", inputs.studyHorizon],
+        ["Module (Wc)", inputs.modulePower, "Modules", inputs.moduleCount],
+        ["Ombres (0-1)", inputs.shadingFactor, "Encrassement (%)", inputs.soilingPercent],
+        ["Mismatch (%)", inputs.mismatchPercent, "Pertes DC (%)", inputs.dcLossPercent],
+        ["Pertes AC (%)", inputs.acLossPercent, "Rendement onduleur (%)", inputs.inverterEff],
+        ["Coeff. temp (%/°C)", inputs.tempCoeff, "NOCT (°C)", inputs.noct],
+        ["Température réf (°C)", inputs.refTemp],
+        ["Variante activée", inputs.variantEnabled ? "Oui" : "Non"],
+        ["Variante inclinaison (°)", inputs.variantTilt, "Variante azimut (°)", inputs.variantAzPanel],
+        [],
+        ["Energie journalière brute (kWh)", energies.daily.raw, "Energie nette", energies.daily.net],
+        ["Energie mensuelle brute (kWh)", energies.monthly.raw, "Energie nette", energies.monthly.net],
+        ["Energie annuelle brute (kWh)", energies.annual.raw, "Energie nette", energies.annual.net],
+        ["Facteur global après pertes (%)", factor * 100],
+        ["Variante annuelle (kWh)", lastSimulation.variantResult?.net ?? "", "Ecart (%)", lastSimulation.variantResult?.deltaPercent ?? ""],
+        [],
+        ["Indicateurs"],
+        ["Production spécifique (kWh/kWp)", indicators.specificYield],
+        ["Performance ratio (%)", indicators.pr],
+        ["Facteur de capacité (%)", indicators.capacity],
+        ["CO2 évité (t/an)", indicators.co2],
+        [],
+        ["Tableau des pertes"],
+        ["Poste", "Pertes (%)", "Pertes (kWh)", "Energie restante (kWh)"],
+      ];
+
+      breakdown.forEach(row => {
+        rows.push([row.name, row.percent, row.lossKwh, row.remaining]);
+      });
+      rows.push(["Energie nette finale", "", "", breakdownFinal]);
+
+      downloadCsv("helios-simulation.csv", rows);
+    }
+
+    function buildReportHtml(kind) {
+      const title = kind === "client" ? "Rapport client" : "Rapport de simulation";
+      const sim = lastSimulation;
+      const lines = [
+        `<h1>${title}</h1>`,
+        `<p><strong>Horodatage :</strong> ${sim.timestamp}</p>`,
+        `<h2>Entrées principales</h2>`,
+        `<p>Lat/Lon: ${sim.inputs.lat} / ${sim.inputs.lon} — Inclinaison ${sim.inputs.tilt}° — Azimut ${sim.inputs.azPanel}°</p>`,
+        `<p>Surface: ${sim.inputs.area} m² — kWp: ${formatNumber(sim.inputs.kWp, 2)}</p>`,
+        `<p>Scénario: ${sim.inputs.scenarioType} — Horizon: ${sim.inputs.studyHorizon}</p>`,
+        `<h2>Résultats</h2>`,
+        `<p>Annuel brut: ${formatNumber(sim.energies.annual.raw, 1)} kWh — Annuel net: ${formatNumber(sim.energies.annual.net, 1)} kWh</p>`,
+        `<p>PR: ${formatNumber(sim.indicators.pr ?? 0, 1)} % — Spécifique: ${formatNumber(sim.indicators.specificYield ?? 0, 1)} kWh/kWp</p>`,
+        `<h2>Pertes</h2>`,
+        `<table><thead><tr><th>Poste</th><th>%</th><th>kWh</th><th>Reste</th></tr></thead><tbody>`,
+        ...sim.breakdown.map(row => `<tr><td>${row.name}</td><td>${formatNumber(row.percent, 1)}</td><td>${formatNumber(row.lossKwh, 2)}</td><td>${formatNumber(row.remaining, 2)}</td></tr>`),
+        `</tbody></table>`,
+      ];
+
+      return `
+        <html>
+          <head>
+            <meta charset="utf-8" />
+            <title>${title}</title>
+            <style>
+              body { font-family: "Work Sans", Arial, sans-serif; margin: 32px; color: #111827; }
+              h1 { font-size: 24px; margin-bottom: 8px; }
+              h2 { font-size: 16px; margin-top: 24px; }
+              table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+              th, td { border: 1px solid #e5e7eb; padding: 6px 8px; text-align: left; font-size: 12px; }
+              th { background: #f9fafb; }
+            </style>
+          </head>
+          <body>${lines.join("")}</body>
+        </html>
+      `;
+    }
+
+    function exportPdf(kind = "pdf") {
+      if (!lastSimulation) {
+        alert("Veuillez lancer une simulation avant d'exporter.");
+        return;
+      }
+      const win = window.open("", "_blank");
+      if (!win) return;
+      win.document.write(buildReportHtml(kind));
+      win.document.close();
+      win.focus();
+      setTimeout(() => win.print(), 300);
+    }
+
+    document.getElementById("btnNow").addEventListener("click", () => simulate("now"));
+    document.getElementById("btnSim").addEventListener("click", () => simulate("sim"));
+    document.getElementById("btnEnergy").addEventListener("click", () => {
+      simulateEnergyProduction().catch(err => console.error("Energy simulation error", err));
+    });
+    document.getElementById("btnExportCsv").addEventListener("click", exportSimulationCsv);
+    document.getElementById("btnExportPdf").addEventListener("click", () => exportPdf("pdf"));
+    document.getElementById("btnExportReport").addEventListener("click", () => exportPdf("client"));
+    document.getElementById("btnFinanceCsv").addEventListener("click", exportFinanceCsv);
+    document.getElementById("btnFinancePdf").addEventListener("click", exportFinancePdf);
+    document.getElementById("btnApplyParams").addEventListener("click", applyParameterDefaultsToInputs);
+    document.getElementById("btnLoadParams").addEventListener("click", loadParameterDefaultsFromInputs);
+    document.getElementById("btnReloadEconomics").addEventListener("click", loadEconomicsData);
+    document.getElementById("btnSavePrefs").addEventListener("click", savePrefsToStorage);
+    document.getElementById("btnLoadPrefs").addEventListener("click", loadPrefsFromStorage);
+    document.getElementById("btnResetPrefs").addEventListener("click", resetPrefs);
+    document.getElementById("prefProfile").addEventListener("change", (event) => {
+      applyProfile(event.target.value);
+    });
+    document.getElementById("prefUnitSystem").addEventListener("change", () => applyUnitSystem(true));
+    document.getElementById("prefUnitLock").addEventListener("change", () => applyUnitSystem(true));
+    [
+      "alertMaxLoss",
+      "alertMaxPayback",
+      "alertMinProduction",
+    ].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener("input", updateAlertStatus);
+    });
+    [
+      "sizingTargetPower",
+      "sizingAvailableArea",
+      "sizingPanelSelect",
+      "sizingDcAc",
+    ].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener("input", updateSizingResults);
+      if (el && el.tagName === "SELECT") {
+        el.addEventListener("change", updateSizingResults);
+      }
+    });
+    document.getElementById("btnOpenReport").addEventListener("click", () => {
+      document.getElementById("reportModal").classList.add("active");
+    });
+    document.getElementById("btnReportCancel").addEventListener("click", () => {
+      document.getElementById("reportModal").classList.remove("active");
+    });
+    document.getElementById("btnReportGenerate").addEventListener("click", () => {
+      exportUnifiedReport(getReportSelection());
+      document.getElementById("reportModal").classList.remove("active");
+    });
+    document.getElementById("cityPreset").addEventListener("change", (event) => {
+      const value = event.target.value;
+      if (!value) return;
+      const [lat, lon] = value.split(",").map(Number);
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+      document.getElementById("lat").value = lat.toFixed(4);
+      document.getElementById("lon").value = lon.toFixed(4);
+    });
+    document.getElementById("btnRefreshWeather").addEventListener("click", () => {
+      const { lat, lon, tz, date, weatherSource } = getInputs();
+      updateWeatherData(weatherSource, lat, lon, tz, date).catch(err => console.error("Weather refresh", err));
+    });
+    [
+      "capexPerKwp",
+      "installedPower",
+      "gridConnection",
+      "engineering",
+      "initialInvestment",
+      "subsidyPercent",
+      "subsidyFixed",
+      "selfConsumption",
+      "feedInTariff",
+      "electricityPrice",
+      "priceEscalation",
+      "annualProduction",
+      "dailyConsumption",
+      "opexFixed",
+      "opexPercent",
+      "insurance",
+      "inverterReplacement",
+    ].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener("input", () => {
+        updateFinanceSummary();
+        updateEconomicsTables();
+        updateRecommendations();
+      });
+    });
+
+    [
+      "modulePower",
+      "moduleCount",
+      "area",
+    ].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener("input", () => {
+        updateEconomicsTables();
+        updateRecommendations();
+      });
+    });
+
+    function initTabs() {
+      const buttons = Array.from(document.querySelectorAll(".tab-button"));
+      const panels = Array.from(document.querySelectorAll(".tab-panel"));
+      if (!buttons.length || !panels.length) return;
+
+      const activate = (name) => {
+        buttons.forEach(btn => {
+          const isActive = btn.dataset.tab === name;
+          btn.classList.toggle("active", isActive);
+          btn.setAttribute("aria-selected", isActive ? "true" : "false");
+        });
+        panels.forEach(panel => {
+          panel.classList.toggle("active", panel.dataset.tab === name);
+        });
+      };
+
+      buttons.forEach(btn => {
+        btn.addEventListener("click", () => activate(btn.dataset.tab));
+      });
+    }
+
+    // init date/time to current local values
+    const now = new Date();
+    const localISO = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString();
+    document.getElementById("date").value = localISO.slice(0, 10);
+    document.getElementById("timeHour").value = localISO.slice(11, 13);
+    const minute = localISO.slice(14, 16);
+    const rounded = String(Math.round(Number(minute) / 5) * 5).padStart(2, "0");
+    document.getElementById("timeMinute").value = rounded === "60" ? "55" : rounded;
+    setWeatherStatus("Météo : ciel clair (offline)", "info");
+    setWeatherDetails(null);
+    initTabs();
+    loadEconomicsData();
+    loadParameterDefaultsFromInputs();
+    loadPrefsFromStorage();
+    simulate("now");
+    simulateEnergyProduction().catch(err => console.error(err));
+    updateFinanceSummary();
+  </script>
+</body>
+</html>

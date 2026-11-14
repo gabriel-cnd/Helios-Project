@@ -1,0 +1,101 @@
+# Journal 
+## Semaine 10 
+### prioritées du projet
+Choix des packages :
+    - numpy   (calculs numériques)
+    - pandas  (manipulation de données)
+    - matplotlib (visualisation des données)
+    - scipy   (calculs scientifiques)
+    - requests (récupération de données en ligne)
+    - astral (calcul position solaire)
+    - control (pilotage des moteurs)
+    - datetime (gestion du temps et des dates)
+    - pytest (tests unitaires)
+    - flet (interface utilisateur)
+
+Arborescence du projet :
+    Calculs
+    - Calcul de la position solaire
+    (Description : Déterminer la trajectoire du soleil pour un site/date)
+        - Azimut 
+        - Hauteur
+        - Zénith
+    - Transposition de l'irrandiance sur un plan incliné
+        -
+
+    Data 
+    - Panneaux photovoltaïques
+    - Données météorologiques
+    - Données géographiques
+    - Batteries 
+    - Onduleurs
+
+    Interface
+
+    RegulMaquette
+
+## Historique des commits (par date)
+### 2026-01-19
+- b70358a MaJ global de l'interface web, exports et exploitation d'economics. Ajout de fenêtre et d'un menu pour faciliter l'utilisation. Ce commit est un travail de groupe où nous avons tous 3 participé
+### 2026-01-08
+- 896eeec amélioration API, ajout villes
+- d82179c récupération données API par proxy
+- 2d76a19 update uv.lock v3
+- 9fce29b update uv.lock
+- 0a2b77c update uv.lock
+- 593de9d ruff
+- d0433e2 Merge branch 'api-meteoswiss'
+- 1e8e469 réparation interface qui marchait plus, simplification d'execution
+- fa26c2b correctif cost_panel
+### 2026-01-07
+- b0cfdd4 refonte cost panel
+### 2026-01-06
+- 03d9f9e Add code coverage percentage display
+- 2f3c949 refonte cost panel
+- 89ec335 add test files
+### 2025-12-16
+- 63e2ac4 onduleur
+- a6a172c meteo swiss implementations
+### 2025-12-11
+- 0e0cd3e economics v1.2
+- 94275e5 ajout d'un fichier récupération MétéoSwiss
+### 2025-12-09
+- 0713f2e ajout simu énergétique
+- 7023a12 ajout simu énergétique
+- c89ad9e MAJ BordLogs
+- 341dbcd GUI web 1.1
+- fbd1cf9 suppression init inutile
+- 28d8901 GUI web version
+- 4932e80 Orientation_engine.py 1.0
+- 5b0444b add economics analyses
+- 1dcaa14 production energetique
+- e5820dc pid.py 1.0 & engine.py 1.0
+- f9e5033 modif graph_widget
+### 2025-12-08
+- a816b56 Cleanup __pycache__ and update .gitignore
+- 00d4f46 Amélioration GraphWidget + simulation journée PV
+- 3eb8478 Màj calcul irradiance + correction accès poa + update interface
+- 4b20eda Ajout interface Qt, widgets, et calcul position soleil
+### 2025-12-07
+- 88b729c Ajout du dossier widget
+- 0abbeeb Add config, metadata and loader
+### 2025-12-03
+- 5bd15ed ajout marche à suivre GIT
+### 2025-12-02
+- b3aa3b4 sun.py 1.0
+- aa8cbf3 geometry.py 1.0
+- bcb7ca2 update boardlog session 1_3
+- e38ea20 Add step-by-step documentation
+- ae39dc4 Merge branch 'main' of github.com:pythonge2-a/mini-projet-helios
+- 7cc740f step-by-step
+- 71fa3fd Merge remote-tracking branch 'refs/remotes/origin/main'
+### 2025-11-27
+- bf6b75e tree structure 2.0
+- 4b9f33f add packages + tree structure
+- f88d830 diary advancement
+- 1b49e34 add packages + tree structure
+- 1fbea7a init projet Helios
+### 2025-11-25
+- 76820a7 add deadline
+- e1a4252 Initial commit
+    

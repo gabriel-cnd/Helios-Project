@@ -1,0 +1,12 @@
+Marque,Modèle,Capacité Nominale (kWh),Chimie,Batteries Modulaires/Scalables,Profondeur de Décharge (DoD),Cycles de Vie Estimés,Gamme de Puissance DC,Compatibilité Onduleur,Caractéristiques Principales
+Tesla,Powerwall 3,13.5,NMC,Oui,>90%,>6000,DC,Good avec Tesla/SolarEdge,"Backups, forte puissance continue, intégration app"
+Enphase,Encharge 10,10.1,LiFePO4,Oui,100%,>10000,DC,Enphase micro inverters,"Gestion intelligente, scalable, intégration Enphase"
+BYD,Battery-Box Premium,8.3-22.1,LiFePO4,Oui,95%,>6000,DC,Large choix d’onduleurs,"Modulaire, longue durée, très compatibilité"
+sonnen,Sonnen Eco 10,10,LiFePO4,Oui,100%,>10000,DC,Hybrid/AC-coupled,"Smart EMS, cycles nombreux, monitoring intégré"
+LG Chem,RESU 10H,9.3,NMC,Oui,~90%,>6000,DC,Multi-marques,"Compacte, haute densité énergétique"
+Fortress,EVault Max,18.5,LiFePO4,Oui,80%@80% DoD,~8000,DC,Multi-marques,"Grande capacité, robuste cycle vie"
+Generac,PWRcell,9-18,LiFePO4,Oui,varie selon configuration,>5000+,DC/AC selon pack,Generac inverter,"Modulaire, intégration avec générateur"
+GoodWe,Lynx Home U,5.4-16.2,LiFePO4,Oui,>90%,>6000,DC,GoodWe hybrid,"Modulaire, intégration onduleur hybride"
+Thanksun,Home Solar Batts,10-30,LiFePO4,Oui,>90%,~10000,DC,Multi-marques,"Longue durée, 12 ans garantie"
+BESS,BESS-P10,10,LiFePO4,Non,100%,~6000,DC,Multi-marques,"IP65, BMS communicant, scalable par parallèle"
+

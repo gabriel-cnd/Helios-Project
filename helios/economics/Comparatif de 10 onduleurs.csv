@@ -1,0 +1,12 @@
+Marque,Modèle,Type,P uissance AC nominale, Efficacité maximale, MPPT (entrées), Tension DC d’entrée, Caractéristiques principales
+Enphase,IQ7A,Micro-onduleur,366 VA,97.5%,1,18-58 V,"Optimisation par panneau, garantie jusqu'à 25 ans"
+SolarEdge,SE10K (Home Hub),String avec optimiseurs,10 kVA,>97%,1+,Variable,"Monitoring panneau par panneau, rendement HD-Wave"
+SMA,Sunny Tripower 10.0 Smart Energy,String/Hybride,10 kW,98.1%,2,DC variable,"Trois-phase, fonctions de sauvegarde automatique"
+Fronius,Primo/Symo,String,3-20 kW+,~98%,2+,DC variable,"Multi-MPPT, installation simple SnapINverter"
+Huawei,SUN2000 (résidentiel),String,2-10 kW,>97%,1-2,DC variable,"IP65, sécurité AFCI, intégration ESS"
+GoodWe,DNS/MT Series,String/Hybride,3-15 kW+,>97%,1-2,DC variable,"IP65, monitoring Wi-Fi"
+Sungrow,SG Series,String,3-20 kW+,>97%,2,DC variable,"Wi-Fi intégré, résidences & commerciaux"
+Solis,S5 Series,String,3-6 kW,~97%,2,DC variable,"Double MPPT, communication Wi-Fi"
+APsystems,QS2/DS3,Micro-onduleur,Variable,~97%,1,Panneau-level,"Gère plusieurs modules par unité"
+Victron Energy,MultiPlus II/EasySolar II,Hybride/Off-grid,Variable,>95%,1+,DC & AC,"Hybrid inverter/charger, gestion batterie"
+
